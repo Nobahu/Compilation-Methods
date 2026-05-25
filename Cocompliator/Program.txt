@@ -1,0 +1,10 @@
+﻿
+Read(1);
+Read(2);
+
+while (i = 1)
+{
+	gdfg
+	gdsfgd
+	hsdfggh
+}
