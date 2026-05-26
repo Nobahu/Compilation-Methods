@@ -17,8 +17,10 @@ namespace Cocompliator
         Minus,
         Multiply,
         Divide,
-        /// Логическое не (хз надо ли)
+        /// Логические операторы
         Not,
+        And,
+        Or,
         /// Левая круглая скобка
         LeftParenthesis,
         /// Правая круглая скобка
@@ -92,8 +94,14 @@ namespace Cocompliator
         F_Divide,
         /// Остаток от деления: A % B
         F_Modulus,
-        /// Логическое НЕ: !A
+        /// Постфиксный инкремент ++
+        F_PostIncrement,
+        /// Постфиксный декремент --
+        F_PostDecrement,
+        /// Логические операторы
         F_Not,
+        F_And,
+        F_Or,
         /// Квадратный корень: sqrt(A)
         F_Sqrt,
         /// Возведение в степень: pow(A,B) (A^B)
@@ -102,6 +110,8 @@ namespace Cocompliator
         F_Sin,
         /// Вычисление косинуса: cos(A)
         F_Cos,
+        /// Вычисление экспоненты': exp(A)
+        F_Exp,
         /// Доступ к элементу массива: A[B] (в RPN: A B F_Index)
         F_Index,
         /// Объявление переменной int: int A
