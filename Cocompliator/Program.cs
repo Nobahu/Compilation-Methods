@@ -1,18 +1,43 @@
-﻿using Cocompliator;
+﻿using System;
+using System.IO;
 
-class Program
+namespace Cocompliator
 {
-    static void Main()
+    // Главный класс программы, отвечающий за запуск
+    public static class Programm
     {
-        string filePath = "C:\\Users\\user\\source\\repos\\Cocompliator\\Cocompliator\\Program.txt";
-        try
+        public static void Main()
         {
-            string cleanedContent = FileReader.Read(filePath);
-            Console.WriteLine(cleanedContent);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
+            try
+            {
+                // Название нашего файла с формулой
+                string testFileName = "test_formulas.txt";
+                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, testFileName);
+                
+                // Чтение исходного кода из файла через ваш FileReader
+                var code = FileReader.Read(filePath);
+                
+                Console.WriteLine("ПУНКТ 1: ТЕСТ СЛОЖНЫХ ФОРМУЛ");
+                Console.WriteLine(code + "\n");
+
+                // Лексический анализ кода
+                LexicalAnalyzer.IsLexicalCorrect(code);
+                var terminals = LexicalAnalyzer.GetTerminals();
+
+                // Трансляция терминалов в ОПС
+                var rpn = RPNTranslator.ConvertToRPN(terminals);
+
+                // Выполнение формулы
+                RPNInterpreter.ExecuteInstructions(rpn);
+            }
+            catch (CompilerException ex)
+            {
+                Console.WriteLine($"\nОшибка компиляции: {ex.Message} на строке {ex.LineNumber}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nОшибка: {ex.Message}");
+            }
         }
     }
 }
