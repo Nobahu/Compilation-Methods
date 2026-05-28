@@ -97,6 +97,8 @@ namespace Cocompliator
             "pow" => TerminalType.Pow,
             "sin" => TerminalType.Sin,
             "cos" => TerminalType.Cos,
+            "int" => TerminalType.Int,
+            "exp" => TerminalType.Exp,
             _ => TerminalType.VariableName
         };
 

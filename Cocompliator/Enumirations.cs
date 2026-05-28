@@ -6,8 +6,10 @@ namespace Cocompliator
 {
    public enum TerminalType
     {
-        /// Целое число
+        /// Константа
         Number,
+        /// Целое число
+        Int,
         /// Строка текста
         Text,
         /// Булевое значение
@@ -62,7 +64,9 @@ namespace Cocompliator
         /// Функция синуса числа
         Sin,
         /// Функция косинуса числа
-        Cos
+        Cos,
+        /// Функция экспоненты
+        Exp
     }
 
     public enum RPNType
