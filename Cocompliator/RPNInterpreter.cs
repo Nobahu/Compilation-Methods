@@ -36,31 +36,33 @@ namespace Cocompliator
                     if ( symbol.RPNType == RPNType.A_VariableName || 
                         symbol.RPNType == RPNType.A_Number || 
                         symbol.RPNType == RPNType.A_TextLine ||
-                        symbol.RPNType == RPNType.A_Boolean )
+                        symbol.RPNType == RPNType.A_Boolean ||
+                        symbol.RPNType == RPNType.М_Mark )
                     {
                         stack.Push(symbol);
                     }
-                    ///// Объявление переменной int
-                    //else if (symbol.RPNType == RPNType.F_Int)
-                    //{
-                    //    if (stack.Count < 1)
-                    //        throw new Exception("Синтаксическая ошибка: после 'int' ожидается имя переменной");
+                    else if (symbol.RPNType == RPNType.F_IntArray)
+                    {
+                        var arrayName = stack.Pop() as RPNIdentifier;   // первым достаём arr (вершина)
+                        var sizeSymbol = stack.Pop();                    // потом n
+                        int size = (int)ResolveValue(sizeSymbol, variables, arrays);
 
-                    //    var target = stack.Pop() as RPNIdentifier;
-                    //    if (target == null)
-                    //        throw new Exception("Синтаксическая ошибка: после 'int' ожидается идентификатор переменной");
-
-                    //    if (variables.ContainsKey(target.Name))
-                    //        throw new Exception($"Переменная '{target.Name}' уже объявлена");
-
-                    //    variables[target.Name] = 0;
-                    //}
+                        var newArray = new List<double>();
+                        for (int i = 0; i < size; i++) newArray.Add(0);
+                        arrays[arrayName.Name] = newArray;
+                    }
+                    else if (symbol.RPNType == RPNType.F_Index)
+                    {
+                        var index = (int)ResolveValue(stack.Pop(), variables, arrays);
+                        var arrayName = stack.Pop() as RPNIdentifier;
+                        stack.Push(new RPNArrayAccess { ArrayName = arrayName.Name, Index = index });
+                    }
                     /// АРИФМЕТИКА
                     else if (symbol.RPNType == RPNType.F_Plus || symbol.RPNType == RPNType.F_Minus ||
                             symbol.RPNType == RPNType.F_Multiply || symbol.RPNType == RPNType.F_Divide)
                     {
-                        double val2 = ResolveValue(stack.Pop(), variables);
-                        double val1 = ResolveValue(stack.Pop(), variables);
+                        double val2 = ResolveValue(stack.Pop(), variables, arrays);
+                        double val1 = ResolveValue(stack.Pop(), variables, arrays);
                         double result = 0;
 
                         if (symbol.RPNType == RPNType.F_Plus) result = val1 + val2;
@@ -111,7 +113,7 @@ namespace Cocompliator
                     /// ПРИСВАИВАНИЕ (=)
                     else if (symbol.RPNType == RPNType.F_Assignment)
                     {
-                        double val = ResolveValue(stack.Pop(), variables);
+                        double val = ResolveValue(stack.Pop(), variables, arrays);
                         var target = stack.Pop();
 
                         // Проверяем, не является ли цель элементом массива
@@ -150,37 +152,37 @@ namespace Cocompliator
                     /// ВЫВОД (write)
                     else if (symbol.RPNType == RPNType.F_Write)
                     {
-                        double val = ResolveValue(stack.Pop(), variables);
+                        double val = ResolveValue(stack.Pop(), variables, arrays);
                         Console.WriteLine($">>> РЕЗУЛЬТАТ: {val}");
                     }
                     /// ФУНКЦИЯ КОРНЯ (sqrt)
                     else if (symbol.RPNType == RPNType.F_Sqrt)
                     {
-                        double val = ResolveValue(stack.Pop(), variables);
+                        double val = ResolveValue(stack.Pop(), variables, arrays);
                         stack.Push(new RPNNumber(RPNType.A_Number) { DoubleData = Math.Sqrt(val) });
                     }
                     /// Функция экспоненты (exp)
                     else if ( symbol.RPNType == RPNType.F_Exp )
                     {
-                        double val = ResolveValue( stack.Pop(), variables );
+                        double val = ResolveValue(stack.Pop(), variables, arrays);
                         stack.Push( new RPNNumber( RPNType.A_Number ) { DoubleData = Math.Exp(val) } );
                     }
                     /// Функция синуса (sin)
                     else if (symbol.RPNType == RPNType.F_Sin)
                     {
-                        double val = ResolveValue(stack.Pop(), variables);
+                        double val = ResolveValue(stack.Pop(), variables, arrays);
                         stack.Push(new RPNNumber(RPNType.A_Number) { DoubleData = Math.Sin(val) });
                     }
                     /// Функция косинуса (cos)
                     else if (symbol.RPNType == RPNType.F_Cos)
                     {
-                        double val = ResolveValue(stack.Pop(), variables);
+                        double val = ResolveValue(stack.Pop(), variables, arrays);
                         stack.Push(new RPNNumber(RPNType.A_Number) { DoubleData = Math.Cos(val) });
                     }
                     else if (symbol.RPNType == RPNType.F_Pow)
                     {
-                        double val2 = ResolveValue(stack.Pop(), variables);
-                        double val1 = ResolveValue(stack.Pop(), variables);
+                        double val2 = ResolveValue(stack.Pop(), variables, arrays);
+                        double val1 = ResolveValue(stack.Pop(), variables, arrays);
                         stack.Push(new RPNNumber(RPNType.A_Number) { DoubleData = Math.Pow(val1, val2) });
                     }
 
@@ -191,8 +193,8 @@ namespace Cocompliator
                         if (stack.Count < 2)
                             throw new Exception("Недостаточно операндов для операции '>'");
 
-                        double val2 = ResolveValue(stack.Pop(), variables);
-                        double val1 = ResolveValue(stack.Pop(), variables);
+                        double val2 = ResolveValue(stack.Pop(), variables, arrays);
+                        double val1 = ResolveValue(stack.Pop(), variables, arrays);
 
                         stack.Push(new RPNBoolean(RPNType.A_Boolean) { Data = val1 > val2 });
                     }
@@ -202,8 +204,8 @@ namespace Cocompliator
                         if (stack.Count < 2)
                             throw new Exception("Недостаточно операндов для операции '<'");
 
-                        double val2 = ResolveValue(stack.Pop(), variables);
-                        double val1 = ResolveValue(stack.Pop(), variables);
+                        double val2 = ResolveValue(stack.Pop(), variables, arrays);
+                        double val1 = ResolveValue(stack.Pop(), variables, arrays);
 
                         stack.Push(new RPNBoolean(RPNType.A_Boolean) { Data = val1 < val2 });
                     }
@@ -213,8 +215,8 @@ namespace Cocompliator
                         if ( stack.Count < 2 )
                             throw new Exception("Недостаточно операндов для операции '<='");
 
-                        double val2 = ResolveValue( stack.Pop(), variables );
-                        double val1 = ResolveValue( stack.Pop(), variables );
+                        double val2 = ResolveValue( stack.Pop(), variables, arrays);
+                        double val1 = ResolveValue( stack.Pop(), variables, arrays);
 
                         stack.Push( new RPNBoolean( RPNType.A_Boolean ) { Data = val1 <= val2 } );
                     }
@@ -224,8 +226,8 @@ namespace Cocompliator
                         if ( stack.Count < 2 )
                             throw new Exception( "Недостаточно операндов для операции '>='" );
 
-                        double val2 = ResolveValue( stack.Pop(), variables );
-                        double val1 = ResolveValue( stack.Pop(), variables );
+                        double val2 = ResolveValue( stack.Pop(), variables, arrays);
+                        double val1 = ResolveValue( stack.Pop(), variables, arrays);
 
                         stack.Push( new RPNBoolean( RPNType.A_Boolean ) { Data = val1 >= val2 } );
                     }
@@ -235,8 +237,8 @@ namespace Cocompliator
                         if ( stack.Count < 2 )
                             throw new Exception( "Недостаточно операндов для операции '=='" );
 
-                        double val2 = ResolveValue(stack.Pop(), variables);
-                        double val1 = ResolveValue(stack.Pop(), variables);
+                        double val2 = ResolveValue(stack.Pop(), variables, arrays);
+                        double val1 = ResolveValue(stack.Pop(), variables, arrays);
 
                         bool result = Math.Abs( val1 - val2 ) < 1e-15;
 
@@ -250,7 +252,7 @@ namespace Cocompliator
                             throw new Exception("Недостаточно операндов для операции '!'");
 
                         var operand = stack.Pop();
-                        bool val = GetBoolValue(operand, variables);
+                        bool val = GetBoolValue(operand, variables, arrays);
                         stack.Push(new RPNBoolean(RPNType.A_Boolean) { Data = !val });
                     }
                     /// Оператор &
@@ -261,8 +263,8 @@ namespace Cocompliator
 
                         var right = stack.Pop();
                         var left = stack.Pop();
-                        bool val1 = GetBoolValue(left, variables);
-                        bool val2 = GetBoolValue(right, variables);
+                        bool val1 = GetBoolValue(left, variables, arrays);
+                        bool val2 = GetBoolValue(right, variables, arrays);
                         stack.Push(new RPNBoolean(RPNType.A_Boolean) { Data = val1 && val2 });
                     }
                     /// Оператор |
@@ -273,13 +275,12 @@ namespace Cocompliator
 
                         var right = stack.Pop();
                         var left = stack.Pop();
-                        bool val1 = GetBoolValue(left, variables);
-                        bool val2 = GetBoolValue(right, variables);
+                        bool val1 = GetBoolValue(left, variables, arrays);
+                        bool val2 = GetBoolValue(right, variables, arrays);
                         stack.Push(new RPNBoolean(RPNType.A_Boolean) { Data = val1 || val2 });
                     }
 
                     /// Условные и безусловные переходы
-
                     if (symbol.RPNType == RPNType.М_Mark)
                     {
                         continue;
@@ -297,7 +298,7 @@ namespace Cocompliator
                         if (mark == null || mark.Position == null)
                             throw new Exception("Некорректная метка для перехода");
 
-                        bool condValue = GetBoolValue(condition, variables);
+                        bool condValue = GetBoolValue(condition, variables, arrays);
 
                         // Если условие ЛОЖНО, переходим к метке
                         if (!condValue)
@@ -328,11 +329,8 @@ namespace Cocompliator
             }
         }
 
-        private static double ResolveValue(RPNSymbol sym, Dictionary<string, double> vars)
+        private static double ResolveValue(RPNSymbol sym, Dictionary<string, double> vars, Dictionary<string, List<double>> arrays)
         {
-            // Отладка
-            Console.WriteLine($"ResolveValue получил: {sym?.GetType().Name}, RPNType: {sym?.RPNType}");
-
             if (sym is RPNNumber num)
                 return num.DoubleData == 0 && num.Data != 0 ? num.Data : num.DoubleData;
 
@@ -347,10 +345,19 @@ namespace Cocompliator
                 return boolVal.Data ? 1.0 : 0.0;
             }
 
+            if (sym is RPNArrayAccess arrayAccess)
+            {
+                if (!arrays.ContainsKey(arrayAccess.ArrayName))
+                    throw new Exception($"Массив '{arrayAccess.ArrayName}' не объявлен");
+                if (arrayAccess.Index < 0 || arrayAccess.Index >= arrays[arrayAccess.ArrayName].Count)
+                    throw new Exception($"Индекс {arrayAccess.Index} выходит за границы");
+                return arrays[arrayAccess.ArrayName][arrayAccess.Index];
+            }
+
             throw new Exception($"Неверный тип операнда: {sym?.GetType().Name}, RPNType: {sym?.RPNType}");
         }
 
-        private static bool GetBoolValue(RPNSymbol sym, Dictionary<string, double> vars)
+        private static bool GetBoolValue(RPNSymbol sym, Dictionary<string, double> vars, Dictionary<string, List<double>> arrays)
         {
             if (sym is RPNBoolean boolVal)
                 return boolVal.Data;
@@ -359,17 +366,21 @@ namespace Cocompliator
             {
                 if (!vars.ContainsKey(id.Name))
                     throw new Exception($"Переменная '{id.Name}' не инициализирована!");
-
-                // Для совместимости: число 0 = false, не 0 = true
-                double numVal = vars[id.Name];
-                return Math.Abs(numVal) > 1e-15;
+                return Math.Abs(vars[id.Name]) > 1e-15;
             }
 
             if (sym is RPNNumber num)
             {
-                // Число 0 = false, не 0 = true
                 double val = num.DoubleData == 0 && num.Data != 0 ? num.Data : num.DoubleData;
                 return Math.Abs(val) > 1e-10;
+            }
+
+            if (sym is RPNArrayAccess arrayAccess)
+            {
+                if (!arrays.ContainsKey(arrayAccess.ArrayName))
+                    throw new Exception($"Массив '{arrayAccess.ArrayName}' не объявлен");
+                double val = arrays[arrayAccess.ArrayName][arrayAccess.Index];
+                return Math.Abs(val) > 1e-15;
             }
 
             throw new Exception($"Невозможно преобразовать {sym?.RPNType} в булево значение");
