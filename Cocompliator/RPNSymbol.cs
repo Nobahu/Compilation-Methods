@@ -12,6 +12,19 @@ namespace Cocompliator
         }
     }
 
+    public class RPNNumber : RPNSymbol
+    {
+        public int Data { get; set; }
+        public double DoubleData { get; set; }
+        public RPNNumber(RPNType type) : base(type) { }
+    }
+
+    public class RPNIdentifier : RPNSymbol
+    {
+        public string Name { get; set; }
+        public RPNIdentifier(RPNType type) : base(type) { }
+    }
+
     public class RPNMark : RPNSymbol
     {
         public MarkType MarkType { get; set; }
@@ -33,5 +46,13 @@ namespace Cocompliator
     {
         public bool Data { get; set; }
         public RPNBoolean(RPNType type) : base(type) { }
+    }
+
+    public class RPNArrayAccess : RPNSymbol
+    {
+        public string ArrayName { get; set; }
+        public int Index { get; set; }
+
+        public RPNArrayAccess() : base(RPNType.F_Index) { }
     }
 }

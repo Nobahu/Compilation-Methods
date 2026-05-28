@@ -212,8 +212,30 @@ namespace Cocompliator
          AddRule( NonTerminal.ReadStatement, TerminalType.Read, new StackSymbol( TerminalType.Read ), new StackSymbol( TerminalType.LeftParenthesis ), new StackSymbol( TerminalType.VariableName ), new StackSymbol( SemanticAction.GenPushVar ), new StackSymbol( TerminalType.RightParenthesis ), new StackSymbol( SemanticAction.GenRead ) );
          AddRule( NonTerminal.WriteStatement, TerminalType.Write, new StackSymbol( TerminalType.Write ), new StackSymbol( TerminalType.LeftParenthesis ), new StackSymbol( NonTerminal.Expression ), new StackSymbol( TerminalType.RightParenthesis ), new StackSymbol( SemanticAction.GenWrite ) );
 
-         // While Statement
-         AddRule( NonTerminal.WhileStatement, TerminalType.While, new StackSymbol( TerminalType.While ), new StackSymbol( SemanticAction.StartWhile ), new StackSymbol( TerminalType.LeftParenthesis ), new StackSymbol( NonTerminal.Condition ), new StackSymbol( TerminalType.RightParenthesis ), new StackSymbol( SemanticAction.WhileCondEnd ), new StackSymbol( NonTerminal.Statement ), new StackSymbol( SemanticAction.EndWhile ) );
+             // While
+            // Один оператор без скобок
+            AddRule(NonTerminal.WhileStatement, TerminalType.While,
+                new StackSymbol(TerminalType.While),
+                new StackSymbol(SemanticAction.StartWhile),
+                new StackSymbol(TerminalType.LeftParenthesis),
+                new StackSymbol(NonTerminal.Condition),
+                new StackSymbol(TerminalType.RightParenthesis),
+                new StackSymbol(SemanticAction.WhileCondEnd),
+                new StackSymbol(NonTerminal.Statement),
+                new StackSymbol(SemanticAction.EndWhile));
+
+            // Блок в скобках
+            AddRule(NonTerminal.WhileStatement, TerminalType.While,
+                new StackSymbol(TerminalType.While),
+                new StackSymbol(SemanticAction.StartWhile),
+                new StackSymbol(TerminalType.LeftParenthesis),
+                new StackSymbol(NonTerminal.Condition),
+                new StackSymbol(TerminalType.RightParenthesis),
+                new StackSymbol(SemanticAction.WhileCondEnd),
+                new StackSymbol(TerminalType.LeftBrace),
+                new StackSymbol(NonTerminal.StatementList),
+                new StackSymbol(TerminalType.RightBrace),
+                new StackSymbol(SemanticAction.EndWhile));
 
          // If Statement
          AddRule( NonTerminal.IfStatement, TerminalType.If, new StackSymbol( TerminalType.If ), new StackSymbol( TerminalType.LeftParenthesis ), new StackSymbol( NonTerminal.Condition ), new StackSymbol( TerminalType.RightParenthesis ), new StackSymbol( SemanticAction.IfCondEnd ), new StackSymbol( NonTerminal.Statement ), new StackSymbol( NonTerminal.ElsePart ) );
