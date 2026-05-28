@@ -1,10 +1,17 @@
 {
     n = 3;
+
+    int[n] arr;
+
     i = 0;
-    x = 0;
     while (i < n) {
-        x = x + 1;
+        arr[i] = i * 10;
         i = i + 1;
     }
-    write(x);
+
+    i = 0;
+    while (i < n) {
+        write(arr[i]);
+        i = i + 1;
+    }
 }

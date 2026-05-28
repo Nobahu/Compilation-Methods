@@ -11,7 +11,7 @@ namespace Cocompliator
             try
             {
                 // Название нашего файла с формулой
-                string testFileName = "C:\\Users\\user\\source\\repos\\Cocompliator\\Cocompliator\\sort_test.txt";
+                string testFileName = "D:\\Compilation-Methods\\Cocompliator\\sort_test.txt";
                 string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, testFileName);
                 
                 // Чтение исходного кода из файла через ваш FileReader
@@ -25,7 +25,7 @@ namespace Cocompliator
                 var terminals = LexicalAnalyzer.GetTerminals();
 
                 // Трансляция терминалов в ОПС
-                var rpn = RPNTranslator.ConvertToRPN(terminals);
+                var rpn = SyntaxAnalyzer.GenerateRPN(terminals);
 
                 // Выполнение формулы
                 RPNInterpreter.ExecuteInstructions(rpn);

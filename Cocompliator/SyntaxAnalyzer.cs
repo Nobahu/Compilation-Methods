@@ -23,7 +23,8 @@ namespace Cocompliator
       ElsePart, // Необязательная ветка else
       WhileStatement, // Цикл while
       ReadStatement, // Оператор ввода
-      WriteStatement // Оператор вывода
+      WriteStatement, // Оператор вывода
+      VarInit
    }
 
    /// @brief Типы семантических действий для генерации ОПС
@@ -50,6 +51,7 @@ namespace Cocompliator
       // Запись обращения к индексу или объявления массива
       GenIndex,
       GenArrayDecl,
+      GenIntDecl,
       // Генерация меток начала, проверки условия и конца цикла while
       StartWhile,
       WhileCondEnd,
@@ -109,72 +111,272 @@ namespace Cocompliator
       private static void InitializeParseTable()
       {
          // Program -> StatementList
-         AddRule( NonTerminal.Program, TerminalType.VariableName, new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.Program, TerminalType.If, new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.Program, TerminalType.While, new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.Program, TerminalType.Read, new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.Program, TerminalType.Write, new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.Program, TerminalType.LeftBrace, new StackSymbol( NonTerminal.StatementList ) );
+         AddRule( NonTerminal.Program, TerminalType.VariableName,
+          new StackSymbol( NonTerminal.StatementList ) 
+         );
+
+         AddRule( NonTerminal.Program, TerminalType.If,
+          new StackSymbol( NonTerminal.StatementList )
+         );
+
+         AddRule( NonTerminal.Program, TerminalType.While,
+          new StackSymbol( NonTerminal.StatementList )
+         );
+
+         AddRule( NonTerminal.Program, TerminalType.Read,
+          new StackSymbol( NonTerminal.StatementList )
+         );
+
+         AddRule( NonTerminal.Program, TerminalType.Write,
+          new StackSymbol( NonTerminal.StatementList )
+         );
+
+         AddRule( NonTerminal.Program, TerminalType.LeftBrace, 
+          new StackSymbol( NonTerminal.StatementList )
+         );
 
          // StatementList -> Statement StatementList | epsilon
-         AddRule( NonTerminal.StatementList, TerminalType.VariableName, new StackSymbol( NonTerminal.Statement ), new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.StatementList, TerminalType.If, new StackSymbol( NonTerminal.Statement ), new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.StatementList, TerminalType.While, new StackSymbol( NonTerminal.Statement ), new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.StatementList, TerminalType.Read, new StackSymbol( NonTerminal.Statement ), new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.StatementList, TerminalType.Write, new StackSymbol( NonTerminal.Statement ), new StackSymbol( NonTerminal.StatementList ) );
-         AddRule( NonTerminal.StatementList, TerminalType.LeftBrace, new StackSymbol( TerminalType.LeftBrace ), new StackSymbol( NonTerminal.StatementList ), new StackSymbol( TerminalType.RightBrace ) );
-         AddRule( NonTerminal.StatementList, TerminalType.RightBrace, Array.Empty<StackSymbol>() );
+         AddRule( NonTerminal.StatementList, TerminalType.VariableName,
+          new StackSymbol( NonTerminal.Statement ),
+          new StackSymbol( NonTerminal.StatementList )
+         );
+
+         AddRule( NonTerminal.StatementList, TerminalType.If,
+          new StackSymbol( NonTerminal.Statement ), 
+          new StackSymbol( NonTerminal.StatementList )
+         );
+
+         AddRule( NonTerminal.StatementList, TerminalType.While, 
+          new StackSymbol( NonTerminal.Statement ), 
+          new StackSymbol( NonTerminal.StatementList ) 
+         );
+
+         AddRule( NonTerminal.StatementList, TerminalType.Read, 
+          new StackSymbol( NonTerminal.Statement ), 
+          new StackSymbol( NonTerminal.StatementList ) 
+         );
+
+         AddRule( NonTerminal.StatementList, TerminalType.Write, 
+          new StackSymbol( NonTerminal.Statement ), 
+          new StackSymbol( NonTerminal.StatementList ) 
+         );
+
+         AddRule( NonTerminal.StatementList, TerminalType.LeftBrace, 
+          new StackSymbol( TerminalType.LeftBrace ), 
+          new StackSymbol( NonTerminal.StatementList ), 
+          new StackSymbol( TerminalType.RightBrace ) 
+         );
+
+         AddRule( NonTerminal.StatementList, TerminalType.RightBrace, 
+          Array.Empty<StackSymbol>()
+         );
 
          // Statement -> VariableName [GenPushVar] StatementSuffix | If | While | Read | Write
-         AddRule( NonTerminal.Statement, TerminalType.VariableName, new StackSymbol( TerminalType.VariableName ), new StackSymbol( SemanticAction.GenPushVar ), new StackSymbol( NonTerminal.StatementSuffix ) );
-         AddRule( NonTerminal.Statement, TerminalType.If, new StackSymbol( NonTerminal.IfStatement ) );
-         AddRule( NonTerminal.Statement, TerminalType.While, new StackSymbol( NonTerminal.WhileStatement ) );
-         AddRule( NonTerminal.Statement, TerminalType.Read, new StackSymbol( NonTerminal.ReadStatement ), new StackSymbol( TerminalType.Semicolon ) );
-         AddRule( NonTerminal.Statement, TerminalType.Write, new StackSymbol( NonTerminal.WriteStatement ), new StackSymbol( TerminalType.Semicolon ) );
+         AddRule( NonTerminal.Statement, TerminalType.VariableName, 
+          new StackSymbol( TerminalType.VariableName ),
+          new StackSymbol( SemanticAction.GenPushVar ), 
+          new StackSymbol( NonTerminal.StatementSuffix ) 
+         );
+
+         AddRule( NonTerminal.Statement, TerminalType.If,
+          new StackSymbol( NonTerminal.IfStatement ) 
+         );
+
+         AddRule( NonTerminal.Statement, TerminalType.While, 
+          new StackSymbol( NonTerminal.WhileStatement )
+         );
+
+         AddRule( NonTerminal.Statement, TerminalType.Read, 
+          new StackSymbol( NonTerminal.ReadStatement ), new StackSymbol( TerminalType.Semicolon ) 
+          );
+
+         AddRule( NonTerminal.Statement, TerminalType.Write, 
+          new StackSymbol( NonTerminal.WriteStatement ), 
+          new StackSymbol( TerminalType.Semicolon ) 
+         );
 
          // StatementSuffix -> = Expression [GenAssign] ; | [ Expression ] ArrayAccess
-         AddRule( NonTerminal.StatementSuffix, TerminalType.Assignment, new StackSymbol( TerminalType.Assignment ), new StackSymbol( NonTerminal.Expression ), new StackSymbol( SemanticAction.GenAssign ), new StackSymbol( TerminalType.Semicolon ) );
-         AddRule( NonTerminal.StatementSuffix, TerminalType.LeftBracket, new StackSymbol( TerminalType.LeftBracket ), new StackSymbol( NonTerminal.Expression ), new StackSymbol( TerminalType.RightBracket ), new StackSymbol( NonTerminal.ArrayAccess ) );
+         AddRule( NonTerminal.StatementSuffix, TerminalType.Assignment, new StackSymbol( TerminalType.Assignment ), 
+          new StackSymbol( NonTerminal.Expression ), 
+          new StackSymbol( SemanticAction.GenAssign ), 
+          new StackSymbol( TerminalType.Semicolon )
+         );
+
+         AddRule( NonTerminal.StatementSuffix, TerminalType.LeftBracket, 
+          new StackSymbol( TerminalType.LeftBracket ), 
+          new StackSymbol( NonTerminal.Expression ), 
+          new StackSymbol( TerminalType.RightBracket ), 
+          new StackSymbol( NonTerminal.ArrayAccess )
+         );
+         
+         AddRule( NonTerminal.StatementSuffix, TerminalType.VariableName, 
+          new StackSymbol( TerminalType.VariableName ), 
+          new StackSymbol( SemanticAction.GenPushVar ), 
+          new StackSymbol( SemanticAction.GenIntDecl ), 
+          new StackSymbol( NonTerminal.VarInit ) 
+         );
+
+         AddRule( NonTerminal.VarInit, TerminalType.Semicolon, 
+          new StackSymbol( TerminalType.Semicolon ) 
+         );
+
+         AddRule( NonTerminal.VarInit, TerminalType.Assignment, 
+          new StackSymbol( TerminalType.Assignment ), 
+          new StackSymbol( SemanticAction.GenPushVar ), // Дублируем имя переменной на стек ОПС для операции присваивания
+          new StackSymbol( NonTerminal.Expression ), 
+          new StackSymbol( SemanticAction.GenAssign ), 
+          new StackSymbol( TerminalType.Semicolon ) 
+         );
 
          // ArrayAccess -> = Expression [GenIndex] [GenAssign] ; | VariableName [GenPushVar] [GenArrayDecl] ;
-         AddRule( NonTerminal.ArrayAccess, TerminalType.Assignment, new StackSymbol( TerminalType.Assignment ), new StackSymbol( NonTerminal.Expression ), new StackSymbol( SemanticAction.GenIndex ), new StackSymbol( SemanticAction.GenAssign ), new StackSymbol( TerminalType.Semicolon ) );
-         AddRule( NonTerminal.ArrayAccess, TerminalType.VariableName, new StackSymbol( TerminalType.VariableName ), new StackSymbol( SemanticAction.GenPushVar ), new StackSymbol( SemanticAction.GenArrayDecl ), new StackSymbol( TerminalType.Semicolon ) );
+         AddRule( NonTerminal.ArrayAccess, TerminalType.Assignment, 
+          new StackSymbol( TerminalType.Assignment ), 
+          new StackSymbol( SemanticAction.GenIndex ),      // Команда индексации выполняется сразу
+          new StackSymbol( NonTerminal.Expression ),    // Затем вычисляется правая часть
+          new StackSymbol( SemanticAction.GenAssign ), 
+          new StackSymbol( TerminalType.Semicolon ) 
+         );
+
+         AddRule( NonTerminal.ArrayAccess, TerminalType.VariableName, 
+          new StackSymbol( TerminalType.VariableName ), 
+          new StackSymbol( SemanticAction.GenPushVar ), 
+          new StackSymbol( SemanticAction.GenArrayDecl ), 
+          new StackSymbol( TerminalType.Semicolon ) 
+         );
 
          // Expression -> Term ExpressionPrime
-         AddRule( NonTerminal.Expression, TerminalType.VariableName, new StackSymbol( NonTerminal.Term ), new StackSymbol( NonTerminal.ExpressionPrime ) );
-         AddRule( NonTerminal.Expression, TerminalType.Number, new StackSymbol( NonTerminal.Term ), new StackSymbol( NonTerminal.ExpressionPrime ) );
-         AddRule( NonTerminal.Expression, TerminalType.LeftParenthesis, new StackSymbol( NonTerminal.Term ), new StackSymbol( NonTerminal.ExpressionPrime ) );
+         AddRule( NonTerminal.Expression, TerminalType.VariableName, 
+          new StackSymbol( NonTerminal.Term ), 
+          new StackSymbol( NonTerminal.ExpressionPrime )
+         );
+
+         AddRule( NonTerminal.Expression, TerminalType.Number, 
+          new StackSymbol( NonTerminal.Term ), 
+          new StackSymbol( NonTerminal.ExpressionPrime ) 
+         );
+
+         AddRule( NonTerminal.Expression, TerminalType.LeftParenthesis,
+          new StackSymbol( NonTerminal.Term ),
+          new StackSymbol( NonTerminal.ExpressionPrime ) 
+         );
 
          // ExpressionPrime -> + Term [GenPlus] ExpressionPrime | - Term [GenMinus] ExpressionPrime | epsilon
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.Plus, new StackSymbol( TerminalType.Plus ), new StackSymbol( NonTerminal.Term ), new StackSymbol( SemanticAction.GenPlus ), new StackSymbol( NonTerminal.ExpressionPrime ) );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.Minus, new StackSymbol( TerminalType.Minus ), new StackSymbol( NonTerminal.Term ), new StackSymbol( SemanticAction.GenMinus ), new StackSymbol( NonTerminal.ExpressionPrime ) );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.Semicolon, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.RightParenthesis, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.RightBracket, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.Equal, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.Less, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.Greater, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.LessEqual, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.GreaterEqual, Array.Empty<StackSymbol>() );
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.Plus, 
+          new StackSymbol( TerminalType.Plus ), 
+          new StackSymbol( NonTerminal.Term ), 
+          new StackSymbol( SemanticAction.GenPlus ), 
+          new StackSymbol( NonTerminal.ExpressionPrime ) 
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.Minus, 
+          new StackSymbol( TerminalType.Minus ), 
+          new StackSymbol( NonTerminal.Term ), 
+          new StackSymbol( SemanticAction.GenMinus ), 
+          new StackSymbol( NonTerminal.ExpressionPrime ) 
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.Semicolon, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.RightParenthesis, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.RightBracket, 
+          Array.Empty<StackSymbol>()
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.Equal, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.Less,
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.Greater,
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.LessEqual, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.GreaterEqual, 
+          Array.Empty<StackSymbol>() 
+         );
 
          // Term -> Factor TermPrime
-         AddRule( NonTerminal.Term, TerminalType.VariableName, new StackSymbol( NonTerminal.Factor ), new StackSymbol( NonTerminal.TermPrime ) );
-         AddRule( NonTerminal.Term, TerminalType.Number, new StackSymbol( NonTerminal.Factor ), new StackSymbol( NonTerminal.TermPrime ) );
-         AddRule( NonTerminal.Term, TerminalType.LeftParenthesis, new StackSymbol( NonTerminal.Factor ), new StackSymbol( NonTerminal.TermPrime ) );
+         AddRule( NonTerminal.Term, TerminalType.VariableName,
+          new StackSymbol( NonTerminal.Factor ), 
+          new StackSymbol( NonTerminal.TermPrime )
+         );
+
+         AddRule( NonTerminal.Term, TerminalType.Number, 
+          new StackSymbol( NonTerminal.Factor ), 
+          new StackSymbol( NonTerminal.TermPrime ) 
+         );
+
+         AddRule( NonTerminal.Term, TerminalType.LeftParenthesis,
+          new StackSymbol( NonTerminal.Factor ), 
+          new StackSymbol( NonTerminal.TermPrime ) 
+         );
 
          // TermPrime -> * Factor [GenMultiply] TermPrime | / Factor [GenDivide] TermPrime | epsilon
-         AddRule( NonTerminal.TermPrime, TerminalType.Multiply, new StackSymbol( TerminalType.Multiply ), new StackSymbol( NonTerminal.Factor ), new StackSymbol( SemanticAction.GenMultiply ), new StackSymbol( NonTerminal.TermPrime ) );
-         AddRule( NonTerminal.TermPrime, TerminalType.Divide, new StackSymbol( TerminalType.Divide ), new StackSymbol( NonTerminal.Factor ), new StackSymbol( SemanticAction.GenDivide ), new StackSymbol( NonTerminal.TermPrime ) );
-         AddRule( NonTerminal.TermPrime, TerminalType.Plus, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.Minus, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.Semicolon, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.RightParenthesis, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.RightBracket, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.Equal, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.Less, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.Greater, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.LessEqual, Array.Empty<StackSymbol>() );
-         AddRule( NonTerminal.TermPrime, TerminalType.GreaterEqual, Array.Empty<StackSymbol>() );
+         AddRule( NonTerminal.TermPrime, TerminalType.Multiply, 
+          new StackSymbol( TerminalType.Multiply ), 
+          new StackSymbol( NonTerminal.Factor ), 
+          new StackSymbol( SemanticAction.GenMultiply ), 
+          new StackSymbol( NonTerminal.TermPrime ) 
+         );
+         
+         AddRule( NonTerminal.TermPrime, TerminalType.Divide, 
+          new StackSymbol( TerminalType.Divide ), 
+          new StackSymbol( NonTerminal.Factor ), 
+          new StackSymbol( SemanticAction.GenDivide ), 
+          new StackSymbol( NonTerminal.TermPrime ) 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.Plus,
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.Minus, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.Semicolon, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.RightParenthesis, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.RightBracket,
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.Equal,
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.Less,
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.Greater, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.LessEqual, 
+          Array.Empty<StackSymbol>() 
+         );
+
+         AddRule( NonTerminal.TermPrime, TerminalType.GreaterEqual, 
+          Array.Empty<StackSymbol>() 
+         );
 
          // Factor -> VariableName [GenPushVar] ArrayAccess | Number [GenPushConst] | ( Expression )
          AddRule( NonTerminal.Factor, TerminalType.VariableName, new StackSymbol( TerminalType.VariableName ), new StackSymbol( SemanticAction.GenPushVar ), new StackSymbol( NonTerminal.ArrayAccess ) );
@@ -212,30 +414,30 @@ namespace Cocompliator
          AddRule( NonTerminal.ReadStatement, TerminalType.Read, new StackSymbol( TerminalType.Read ), new StackSymbol( TerminalType.LeftParenthesis ), new StackSymbol( TerminalType.VariableName ), new StackSymbol( SemanticAction.GenPushVar ), new StackSymbol( TerminalType.RightParenthesis ), new StackSymbol( SemanticAction.GenRead ) );
          AddRule( NonTerminal.WriteStatement, TerminalType.Write, new StackSymbol( TerminalType.Write ), new StackSymbol( TerminalType.LeftParenthesis ), new StackSymbol( NonTerminal.Expression ), new StackSymbol( TerminalType.RightParenthesis ), new StackSymbol( SemanticAction.GenWrite ) );
 
-             // While
-            // Один оператор без скобок
-            AddRule(NonTerminal.WhileStatement, TerminalType.While,
-                new StackSymbol(TerminalType.While),
-                new StackSymbol(SemanticAction.StartWhile),
-                new StackSymbol(TerminalType.LeftParenthesis),
-                new StackSymbol(NonTerminal.Condition),
-                new StackSymbol(TerminalType.RightParenthesis),
-                new StackSymbol(SemanticAction.WhileCondEnd),
-                new StackSymbol(NonTerminal.Statement),
-                new StackSymbol(SemanticAction.EndWhile));
+         // While
+         // Один оператор без скобок
+         AddRule(NonTerminal.WhileStatement, TerminalType.While,
+         new StackSymbol(TerminalType.While),
+         new StackSymbol(SemanticAction.StartWhile),
+         new StackSymbol(TerminalType.LeftParenthesis),
+         new StackSymbol(NonTerminal.Condition),
+         new StackSymbol(TerminalType.RightParenthesis),
+         new StackSymbol(SemanticAction.WhileCondEnd),
+         new StackSymbol(NonTerminal.Statement),
+         new StackSymbol(SemanticAction.EndWhile));
 
-            // Блок в скобках
-            AddRule(NonTerminal.WhileStatement, TerminalType.While,
-                new StackSymbol(TerminalType.While),
-                new StackSymbol(SemanticAction.StartWhile),
-                new StackSymbol(TerminalType.LeftParenthesis),
-                new StackSymbol(NonTerminal.Condition),
-                new StackSymbol(TerminalType.RightParenthesis),
-                new StackSymbol(SemanticAction.WhileCondEnd),
-                new StackSymbol(TerminalType.LeftBrace),
-                new StackSymbol(NonTerminal.StatementList),
-                new StackSymbol(TerminalType.RightBrace),
-                new StackSymbol(SemanticAction.EndWhile));
+         // Блок в скобках
+         AddRule(NonTerminal.WhileStatement, TerminalType.While,
+         new StackSymbol(TerminalType.While),
+         new StackSymbol(SemanticAction.StartWhile),
+         new StackSymbol(TerminalType.LeftParenthesis),
+         new StackSymbol(NonTerminal.Condition),
+         new StackSymbol(TerminalType.RightParenthesis),
+         new StackSymbol(SemanticAction.WhileCondEnd),
+         new StackSymbol(TerminalType.LeftBrace),
+         new StackSymbol(NonTerminal.StatementList),
+         new StackSymbol(TerminalType.RightBrace),
+         new StackSymbol(SemanticAction.EndWhile));
 
          // If Statement
          AddRule( NonTerminal.IfStatement, TerminalType.If, new StackSymbol( TerminalType.If ), new StackSymbol( TerminalType.LeftParenthesis ), new StackSymbol( NonTerminal.Condition ), new StackSymbol( TerminalType.RightParenthesis ), new StackSymbol( SemanticAction.IfCondEnd ), new StackSymbol( NonTerminal.Statement ), new StackSymbol( NonTerminal.ElsePart ) );
@@ -247,7 +449,7 @@ namespace Cocompliator
          AddRule( NonTerminal.ElsePart, TerminalType.Write, new StackSymbol( SemanticAction.IfElseEnd ) );
          AddRule( NonTerminal.ElsePart, TerminalType.RightBrace, new StackSymbol( SemanticAction.IfElseEnd ) );
          AddRule( NonTerminal.ElsePart, TerminalType.Semicolon, new StackSymbol( SemanticAction.IfElseEnd ) );
-      }
+         }
 
       private static void AddRule( NonTerminal nt, TerminalType t, params StackSymbol[] symbols )
       {
@@ -290,9 +492,20 @@ namespace Cocompliator
             else if ( top.Type == StackSymbolType.NonTerminal )
             {
                if ( currentToken == null )
-               {
-                  throw new CompilerException( $"Синтаксическая ошибка: Неожиданный конец файла", lastTerminal?.LinePointer ?? 1, lastTerminal?.CharPointer ?? 1 );
-               }
+                {
+                    // Если мы дошли до конца файла (EOF), то некоторые нетерминалы 
+                    // могут быть безопасно раскрыты в пустоту (epsilon)
+                    if ( top.NonTerminal == NonTerminal.StatementList || 
+                        top.NonTerminal == NonTerminal.ElsePart || 
+                        top.NonTerminal == NonTerminal.ExpressionPrime ||
+                        top.NonTerminal == NonTerminal.TermPrime ||
+                        top.NonTerminal == NonTerminal.ArrayAccess )
+                    {
+                        continue; // Просто убираем нетерминал со стека и продолжаем разбор
+                    }
+                    
+                    throw new CompilerException( $"Синтаксическая ошибка: Неожиданный конец файла", lastTerminal?.LinePointer ?? 1, lastTerminal?.CharPointer ?? 1 );
+                }
 
                var key = ( top.NonTerminal, currentToken.TerminalType );
                if ( !ParseTable.TryGetValue( key, out var production ) )
@@ -313,6 +526,15 @@ namespace Cocompliator
             {
                ExecuteSemanticAction( top.Action, rpn, labelStack, ref labelCounter, lastTerminal );
             }
+         }
+         if ( currentTokenIndex < terminals.Count )
+         {
+            Terminal trailingToken = terminals[currentTokenIndex];
+            throw new CompilerException( 
+               $"Синтаксическая ошибка: Лишний символ '{trailingToken.TerminalType}' после конца программы. Возможно, пропущена открывающая скобка '{{' в начале.", 
+               trailingToken.LinePointer, 
+               trailingToken.CharPointer 
+            );
          }
 
          return rpn;
@@ -393,6 +615,10 @@ namespace Cocompliator
             case SemanticAction.GenIndex:
                rpn.Add( new RPNSymbol( RPNType.F_Index ) { LinePointer = line, CharPointer = col } );
                break;
+
+            case SemanticAction.GenIntDecl:
+                rpn.Add( new RPNSymbol( RPNType.F_Int ) { LinePointer = line, CharPointer = col } );
+                break;
 
             case SemanticAction.GenArrayDecl:
                rpn.Add( new RPNSymbol( RPNType.F_IntArray ) { LinePointer = line, CharPointer = col } );
