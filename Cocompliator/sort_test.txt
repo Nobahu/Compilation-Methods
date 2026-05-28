@@ -1,17 +1,16 @@
 {
-    n = 3;
 
-    int[n] arr;
+	int i = 0;
+	int x;
+	read(x);
+	int Multiplier = 3;
 
-    i = 0;
-    while (i < n) {
-        arr[i] = i * 10;
-        i = i + 1;
-    }
+	while (i <= 10)
+	{
+		x = x + i * Multiplier;
+		i = i + 1;
+	}
 
-    i = 0;
-    while (i < n) {
-        write(arr[i]);
-        i = i + 1;
-    }
+	write(x);
+
 }
