@@ -49,7 +49,7 @@ namespace Cocompliator
                     }
                     else
                     {
-                        if (state == 11 && action.NextState == 0)
+                        if ((state == 11 || state == 12) && action.NextState == 0)
                         {
                             buffer = "";
                         }
@@ -106,6 +106,7 @@ namespace Cocompliator
             "cos" => TerminalType.Cos,
             "int" => TerminalType.Int,
             "exp" => TerminalType.Exp,
+            "string" => TerminalType.String,
             _ => TerminalType.VariableName
         };
 
@@ -113,7 +114,7 @@ namespace Cocompliator
         {
             if (type == TerminalType.Number)
                 Terminals.Add(new Terminal.Number(type, line, ch, value));
-            else if (type == TerminalType.VariableName)
+            else if (type == TerminalType.VariableName || type == TerminalType.Text)
                 Terminals.Add(new Terminal.Identifier(type, line, ch, value));
             else
                 Terminals.Add(new Terminal(type, line, ch));
@@ -144,7 +145,7 @@ namespace Cocompliator
             if (c == '\n') return 22;
             if (c == '#') return 19;
             if (c == '&') return 20;
-            if (c == '|') return 21;
+            if (c == '"') return 21;
             
             // Если символ не подошел ни под одно условие выше, он попадает сюда.
             // Колонка 23 должна вызывать ошибку (IsError = true) в таблице переходов для начального состояния.

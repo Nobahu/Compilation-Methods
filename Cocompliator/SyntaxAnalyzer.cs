@@ -25,7 +25,8 @@ namespace Cocompliator
       ReadStatement, // Оператор ввода
       WriteStatement, // Оператор вывода
       VarInit, // Инициализация переменной
-      IntStatement // Целочисленный тип данных
+      IntStatement, // Целочисленный тип данных
+      StringStatement //Строковый тип данных
    }
 
    /// @brief Типы семантических действий для генерации ОПС
@@ -61,6 +62,8 @@ namespace Cocompliator
       GenPostIncrement,
       GenPostDecrement,
       GenExp,
+      GenStringDecl,
+      GenPushConstText,
       // Генерация меток начала, проверки условия и конца цикла while
       StartWhile,
       WhileCondEnd,
@@ -148,6 +151,11 @@ namespace Cocompliator
           new StackSymbol( NonTerminal.StatementList )
          );
 
+         AddRule( NonTerminal.Program, TerminalType.String, 
+         new StackSymbol( NonTerminal.StatementList )
+         );
+
+
          // StatementList -> Statement StatementList | epsilon
 
          AddRule( NonTerminal.StatementList, TerminalType.VariableName,
@@ -189,6 +197,11 @@ namespace Cocompliator
           Array.Empty<StackSymbol>()
          );
 
+         AddRule( NonTerminal.StatementList, TerminalType.String, 
+          new StackSymbol( NonTerminal.Statement ), 
+          new StackSymbol( NonTerminal.StatementList ) 
+         );
+
          // Statement -> VariableName [GenPushVar] StatementSuffix | If | While | Read | Write
 
          AddRule( NonTerminal.Statement, TerminalType.VariableName, 
@@ -220,6 +233,11 @@ namespace Cocompliator
           new StackSymbol( TerminalType.Semicolon ) 
          );
 
+         AddRule( NonTerminal.Statement, TerminalType.String,
+          new StackSymbol( TerminalType.String ), 
+          new StackSymbol( NonTerminal.StringStatement ) 
+         );
+
          AddRule( NonTerminal.IntStatement, TerminalType.VariableName, 
             new StackSymbol( TerminalType.VariableName ), 
             new StackSymbol( SemanticAction.GenPushVar ), 
@@ -235,6 +253,13 @@ namespace Cocompliator
             new StackSymbol( SemanticAction.GenPushVar ), 
             new StackSymbol( SemanticAction.GenArrayDecl ), 
             new StackSymbol( TerminalType.Semicolon ) 
+         );
+
+         AddRule( NonTerminal.StringStatement, TerminalType.VariableName, 
+            new StackSymbol( TerminalType.VariableName ), 
+            new StackSymbol( SemanticAction.GenPushVar ), 
+            new StackSymbol( SemanticAction.GenStringDecl ), 
+            new StackSymbol( NonTerminal.VarInit ) 
          );
 
          // StatementSuffix -> = Expression [GenAssign] ; | [ Expression ] ArrayAccess
@@ -532,6 +557,11 @@ namespace Cocompliator
             new StackSymbol( SemanticAction.GenExp ) 
          );
 
+         AddRule( NonTerminal.Factor, TerminalType.Text, 
+            new StackSymbol( TerminalType.Text ), 
+            new StackSymbol( SemanticAction.GenPushConstText ) 
+         );
+
          // ArrayAccess -> [ Expression ] [GenIndex] | epsilon
 
          AddRule( NonTerminal.ArrayAccess, TerminalType.LeftBracket, 
@@ -686,7 +716,7 @@ namespace Cocompliator
             new StackSymbol( NonTerminal.BlockOrStatement ), // Используем строгий блок {} вместо Statement
             new StackSymbol( NonTerminal.ElsePart ) 
          );
-         
+
          AddRule( NonTerminal.ElsePart, TerminalType.Else, 
             new StackSymbol( TerminalType.Else ), 
             new StackSymbol( SemanticAction.IfElseStart ), 
@@ -899,6 +929,17 @@ namespace Cocompliator
             case SemanticAction.GenIntDecl:
                 rpn.Add( new RPNSymbol( RPNType.F_Int ) { LinePointer = line, CharPointer = col } );
                 break;
+
+            case SemanticAction.GenStringDecl: // <-- ДОБАВИТЬ КЕЙС
+               rpn.Add( new RPNSymbol( RPNType.F_String ) { LinePointer = line, CharPointer = col } );
+               break;
+
+            case SemanticAction.GenPushConstText: // <-- ДОБАВИТЬ КЕЙС
+               if ( last is Terminal.Identifier textNode )
+               {
+                  rpn.Add( new RPNTextLine( RPNType.A_TextLine ) { Data = textNode.Name, LinePointer = line, CharPointer = col } );
+               }
+               break;
 
             case SemanticAction.GenArrayDecl:
                rpn.Add( new RPNSymbol( RPNType.F_IntArray ) { LinePointer = line, CharPointer = col } );

@@ -31,6 +31,7 @@ namespace Cocompliator
                 Console.WriteLine("========================");
 
                 var variables = new Dictionary<string, double>();
+                var stringVariables = new Dictionary<string, string>();
                 var arrays = new Dictionary<string, List<double>>();
                 var stack = new Stack<RPNSymbol>();
 
@@ -146,12 +147,35 @@ namespace Cocompliator
                     /// ПРИСВАИВАНИЕ (=)
                     else if (symbol.RPNType == RPNType.F_Assignment)
                     {
-                        double val = ResolveValue(stack.Pop(), variables, arrays);
+                        var valSymbol = stack.Pop();
                         var target = stack.Pop();
 
-                        // Проверяем, не является ли цель элементом массива
-                        if (target is RPNArrayAccess arrayAccess)
+                        if (target is RPNIdentifier targetVar)
                         {
+                            // 1. Присваивание строкового литерала
+                            if (valSymbol is RPNTextLine textVal)
+                            {
+                                stringVariables[targetVar.Name] = textVal.Data;
+                            }
+                            // 2. Присваивание значения другой строковой переменной
+                            else if (valSymbol is RPNIdentifier sourceVar && stringVariables.ContainsKey(sourceVar.Name))
+                            {
+                                stringVariables[targetVar.Name] = stringVariables[sourceVar.Name];
+                            }
+                            // 3. Стандартное присваивание чисел
+                            else
+                            {
+                                double val = ResolveValue(valSymbol, variables, arrays);
+                                if (!variables.ContainsKey(targetVar.Name))
+                                {
+                                    variables[targetVar.Name] = 0;
+                                }
+                                variables[targetVar.Name] = val;
+                            }
+                        }
+                        else if (target is RPNArrayAccess arrayAccess)
+                        {
+                            double val = ResolveValue(valSymbol, variables, arrays);
                             if (!arrays.ContainsKey(arrayAccess.ArrayName))
                                 throw new Exception($"Error: Массив '{arrayAccess.ArrayName}' не объявлен");
 
@@ -160,19 +184,6 @@ namespace Cocompliator
 
                             arrays[arrayAccess.ArrayName][arrayAccess.Index] = val;
                             Console.WriteLine($"{arrayAccess.ArrayName}[{arrayAccess.Index}] = {val}");
-                        }
-                        else if (target is RPNIdentifier targetVar)
-                        {
-                            // Автоматически создаём переменную, если её нет
-                            if (!variables.ContainsKey(targetVar.Name))
-                            {
-                                variables[targetVar.Name] = 0;
-                            }
-                            variables[targetVar.Name] = val;
-                        }
-                        else
-                        {
-                            throw new Exception("Error: Левая часть присваивания должна быть переменной или элементом массива");
                         }
                     }
                     /// ВВОД (read)
@@ -185,8 +196,24 @@ namespace Cocompliator
                     /// ВЫВОД (write)
                     else if (symbol.RPNType == RPNType.F_Write)
                     {
-                        double val = ResolveValue(stack.Pop(), variables, arrays);
-                        Console.WriteLine($">>> {val}");
+                        var valSymbol = stack.Pop();
+                        
+                        // Вывод строкового литерала
+                        if (valSymbol is RPNTextLine textLine)
+                        {
+                            Console.WriteLine($">>> {textLine.Data.Trim('"')}");
+                        }
+                        // Вывод строковой переменной
+                        else if (valSymbol is RPNIdentifier id && stringVariables.ContainsKey(id.Name))
+                        {
+                            Console.WriteLine($">>> {stringVariables[id.Name].Trim('"')}");
+                        }
+                        // Вывод чисел
+                        else
+                        {
+                            double val = ResolveValue(valSymbol, variables, arrays);
+                            Console.WriteLine($">>> {val}");
+                        }
                     }
                     /// МАТЕМАТИЧЕСКИЕ ФУНКЦИИ
                     else if (symbol.RPNType == RPNType.F_Sqrt ||
@@ -345,6 +372,13 @@ namespace Cocompliator
                         bool result = Math.Abs(val1 - val2) >= 1e-15;
 
                         stack.Push(new RPNBoolean(RPNType.A_Boolean) { Data = result });
+                    }
+                    else if (symbol.RPNType == RPNType.F_String)
+                    {
+                        var target = stack.Pop() as RPNIdentifier;
+                        if (target == null)
+                            throw new Exception("Error: Ожидался идентификатор при объявлении string");
+                        stringVariables[target.Name] = "";
                     }
                 }
             }

@@ -17,11 +17,11 @@ namespace Cocompliator
 
     public static class TransitionTable
     {
-        public static readonly StateTransition[,] Matrix = new StateTransition[12, 24];
+        public static readonly StateTransition[,] Matrix = new StateTransition[13, 24];
 
         static TransitionTable()
         {
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < 13; i++)
                 for (int j = 0; j < 24; j++)
                     Matrix[i, j] = StateTransition.Error();
 
@@ -47,7 +47,7 @@ namespace Cocompliator
             Matrix[0, 18] = StateTransition.Skip();
             Matrix[0, 19] = StateTransition.GoTo(11);
             Matrix[0, 20] = StateTransition.Skip();
-            Matrix[0, 21] = StateTransition.Skip();
+            Matrix[0, 21] = StateTransition.GoTo(12);
             Matrix[0, 22] = StateTransition.Skip();
 
             // s1
@@ -91,7 +91,7 @@ namespace Cocompliator
             // s10
             for (int j = 0; j < 24; j++) Matrix[10, j] = StateTransition.ZStar(TerminalType.Divide);
             
-            //s11
+            // s11
             for (int j = 0; j < 24; j++)
             {
                 if (j == 22) // Колонка 22 соответствует символу новой строки '\n'
@@ -101,6 +101,19 @@ namespace Cocompliator
                 else
                 {
                     Matrix[11, j] = StateTransition.GoTo(11); // Все остальные символы просто поглощаем
+                }
+            }
+
+            // s12
+            for (int j = 0; j < 24; j++)
+            {
+                if (j == 21) // Если встретили закрывающую кавычку '"'
+                {
+                    Matrix[12, j] = StateTransition.Z(TerminalType.Text); // Завершаем разбор, возвращаем Text
+                }
+                else
+                {
+                    Matrix[12, j] = StateTransition.GoTo(12); // Все остальные символы внутри кавычек поглощаем
                 }
             }
         }
