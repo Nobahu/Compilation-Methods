@@ -370,7 +370,12 @@ namespace Cocompliator
           AddRule(NonTerminal.Expression, TerminalType.Minus,
           new StackSymbol(NonTerminal.Term),
           new StackSymbol(NonTerminal.ExpressionPrime)
-          );
+         );
+
+         AddRule( NonTerminal.Expression, TerminalType.Text, 
+          new StackSymbol( NonTerminal.Term ), 
+          new StackSymbol( NonTerminal.ExpressionPrime ) 
+         );
 
             // ExpressionPrime -> + Term [GenPlus] ExpressionPrime | - Term [GenMinus] ExpressionPrime | epsilon
 
@@ -457,11 +462,16 @@ namespace Cocompliator
           new StackSymbol( NonTerminal.TermPrime ) 
          );
 
-            // Term -> Factor TermPrime  (для случая, когда начинается с минуса)
-        AddRule(NonTerminal.Term, TerminalType.Minus,
-            new StackSymbol(NonTerminal.Factor),
-            new StackSymbol(NonTerminal.TermPrime)
-        );
+               // Term -> Factor TermPrime  (для случая, когда начинается с минуса)
+         AddRule(NonTerminal.Term, TerminalType.Minus,
+               new StackSymbol(NonTerminal.Factor),
+               new StackSymbol(NonTerminal.TermPrime)
+         );
+
+         AddRule( NonTerminal.Term, TerminalType.Text, 
+          new StackSymbol( NonTerminal.Factor ), 
+          new StackSymbol( NonTerminal.TermPrime ) 
+         );
 
             // TermPrime -> * Factor [GenMultiply] TermPrime | / Factor [GenDivide] TermPrime | epsilon
 
@@ -908,8 +918,7 @@ namespace Cocompliator
                break;
 
             case SemanticAction.GenNotEqual:
-               rpn.Add( new RPNSymbol( RPNType.F_Equal ) { LinePointer = line, CharPointer = col } );
-               rpn.Add( new RPNSymbol( RPNType.F_Not ) { LinePointer = line, CharPointer = col } );
+               rpn.Add( new RPNSymbol( RPNType.F_NotEqual ) { LinePointer = line, CharPointer = col } );
                break;
 
             case SemanticAction.GenLess:
@@ -944,11 +953,11 @@ namespace Cocompliator
                 rpn.Add( new RPNSymbol( RPNType.F_Int ) { LinePointer = line, CharPointer = col } );
                 break;
 
-            case SemanticAction.GenStringDecl: // <-- ДОБАВИТЬ КЕЙС
+            case SemanticAction.GenStringDecl:
                rpn.Add( new RPNSymbol( RPNType.F_String ) { LinePointer = line, CharPointer = col } );
                break;
 
-            case SemanticAction.GenPushConstText: // <-- ДОБАВИТЬ КЕЙС
+            case SemanticAction.GenPushConstText:
                if ( last is Terminal.Identifier textNode )
                {
                   rpn.Add( new RPNTextLine( RPNType.A_TextLine ) { Data = textNode.Name, LinePointer = line, CharPointer = col } );
