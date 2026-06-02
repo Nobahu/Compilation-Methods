@@ -829,10 +829,16 @@ namespace Cocompliator
             {
                if ( currentToken == null )
                 {
-                    // Если мы дошли до конца файла (EOF), то некоторые нетерминалы 
-                    // могут быть безопасно раскрыты в пустоту (epsilon)
+                    // Если мы дошли до конца файла (EOF) и на стеке ElsePart, 
+                    // принудительно закрываем ветку условного перехода
+                    if ( top.NonTerminal == NonTerminal.ElsePart )
+                    {
+                        parseStack.Push( new StackSymbol( SemanticAction.IfElseEnd ) );
+                        continue;
+                    }
+
+                    // Для остальных нетерминалов, допускающих epsilon, продолжаем обычный пропуск
                     if ( top.NonTerminal == NonTerminal.StatementList || 
-                        top.NonTerminal == NonTerminal.ElsePart || 
                         top.NonTerminal == NonTerminal.ExpressionPrime ||
                         top.NonTerminal == NonTerminal.TermPrime ||
                         top.NonTerminal == NonTerminal.ArrayAccess )
