@@ -17,11 +17,11 @@ namespace Cocompliator
 
     public static class TransitionTable
     {
-        public static readonly StateTransition[,] Matrix = new StateTransition[11, 24];
+        public static readonly StateTransition[,] Matrix = new StateTransition[12, 24];
 
         static TransitionTable()
         {
-            for (int i = 0; i < 11; i++)
+            for (int i = 0; i < 12; i++)
                 for (int j = 0; j < 24; j++)
                     Matrix[i, j] = StateTransition.Error();
 
@@ -45,7 +45,7 @@ namespace Cocompliator
             Matrix[0, 16] = StateTransition.Z(TerminalType.Semicolon);
             Matrix[0, 17] = StateTransition.Skip();
             Matrix[0, 18] = StateTransition.Skip();
-            Matrix[0, 19] = StateTransition.Skip();
+            Matrix[0, 19] = StateTransition.GoTo(11);
             Matrix[0, 20] = StateTransition.Skip();
             Matrix[0, 21] = StateTransition.Skip();
             Matrix[0, 22] = StateTransition.Skip();
@@ -79,13 +79,30 @@ namespace Cocompliator
             for (int j = 0; j < 24; j++) if (j != 6) Matrix[7, j] = StateTransition.ZStar(TerminalType.Greater);
 
             // s8
-            for (int j = 0; j < 24; j++) Matrix[8, j] = StateTransition.ZStar(TerminalType.Not);
+            Matrix[8, 6] = StateTransition.Z(TerminalType.NotEqual); 
+            for (int j = 0; j < 24; j++) 
+            {
+                if (j != 6) Matrix[8, j] = StateTransition.ZStar(TerminalType.Not); 
+            }
 
             // s9
             for (int j = 0; j < 24; j++) Matrix[9, j] = StateTransition.ZStar(TerminalType.Multiply);
 
             // s10
             for (int j = 0; j < 24; j++) Matrix[10, j] = StateTransition.ZStar(TerminalType.Divide);
+            
+            //s11
+            for (int j = 0; j < 24; j++)
+            {
+                if (j == 22) // Колонка 22 соответствует символу новой строки '\n'
+                {
+                    Matrix[11, j] = StateTransition.Skip(); // Завершаем комментарий, возвращаемся в s0
+                }
+                else
+                {
+                    Matrix[11, j] = StateTransition.GoTo(11); // Все остальные символы просто поглощаем
+                }
+            }
         }
     }
 }
