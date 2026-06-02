@@ -94,7 +94,6 @@ namespace Cocompliator
             "read" => TerminalType.Read,
             "write" => TerminalType.Write,
             "sqrt" => TerminalType.Sqrt,
-            "pow" => TerminalType.Pow,
             "sin" => TerminalType.Sin,
             "cos" => TerminalType.Cos,
             "int" => TerminalType.Int,
@@ -113,7 +112,9 @@ namespace Cocompliator
         }
         private static int GetCharColumn(char c)
         {
-            if (char.IsLetter(c) || c == '_') return 0;
+            // Проверка на латиницу (A-Z, a-z) и подчеркивание
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') return 0;
+            
             if (char.IsDigit(c)) return 1;
             if (c == '+') return 2;
             if (c == '-') return 3;
@@ -136,7 +137,10 @@ namespace Cocompliator
             if (c == '#') return 19;
             if (c == '&') return 20;
             if (c == '|') return 21;
-            return 23;
+            
+            // Если символ не подошел ни под одно условие выше, он попадает сюда.
+            // Колонка 23 должна вызывать ошибку (IsError = true) в таблице переходов для начального состояния.
+            return 23; 
         }
 
         public static List<Terminal> GetTerminals() => Terminals;
