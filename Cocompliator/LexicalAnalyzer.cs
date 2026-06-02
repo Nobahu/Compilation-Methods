@@ -49,7 +49,15 @@ namespace Cocompliator
                     }
                     else
                     {
-                        buffer += c;
+                        if (state == 11 && action.NextState == 0)
+                        {
+                            buffer = "";
+                        }
+                        else
+                        {
+                            buffer += c;
+                        }
+
                         state = action.NextState;
                         AdvancePointer();
                     }
