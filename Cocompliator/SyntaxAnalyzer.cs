@@ -330,9 +330,13 @@ namespace Cocompliator
           new StackSymbol( TerminalType.Semicolon ) 
          );
 
-         // Expression -> Term ExpressionPrime
+         AddRule(NonTerminal.ArrayAccess, TerminalType.NotEqual,
+          Array.Empty<StackSymbol>()
+         );
 
-         AddRule( NonTerminal.Expression, TerminalType.VariableName, 
+            // Expression -> Term ExpressionPrime
+
+            AddRule( NonTerminal.Expression, TerminalType.VariableName, 
           new StackSymbol( NonTerminal.Term ), 
           new StackSymbol( NonTerminal.ExpressionPrime )
          );
@@ -377,9 +381,9 @@ namespace Cocompliator
           new StackSymbol( NonTerminal.ExpressionPrime ) 
          );
 
-            // ExpressionPrime -> + Term [GenPlus] ExpressionPrime | - Term [GenMinus] ExpressionPrime | epsilon
+         // ExpressionPrime -> + Term [GenPlus] ExpressionPrime | - Term [GenMinus] ExpressionPrime | epsilon
 
-            AddRule( NonTerminal.ExpressionPrime, TerminalType.Plus, 
+         AddRule( NonTerminal.ExpressionPrime, TerminalType.Plus, 
           new StackSymbol( TerminalType.Plus ), 
           new StackSymbol( NonTerminal.Term ), 
           new StackSymbol( SemanticAction.GenPlus ), 
@@ -424,6 +428,10 @@ namespace Cocompliator
          AddRule( NonTerminal.ExpressionPrime, TerminalType.GreaterEqual, 
           Array.Empty<StackSymbol>() 
          );
+            
+         AddRule(NonTerminal.ExpressionPrime, TerminalType.NotEqual,
+          Array.Empty<StackSymbol>()
+         );
 
          // Term -> Factor TermPrime
 
@@ -462,7 +470,7 @@ namespace Cocompliator
           new StackSymbol( NonTerminal.TermPrime ) 
          );
 
-               // Term -> Factor TermPrime  (для случая, когда начинается с минуса)
+         // Term -> Factor TermPrime  (для случая, когда начинается с минуса)
          AddRule(NonTerminal.Term, TerminalType.Minus,
                new StackSymbol(NonTerminal.Factor),
                new StackSymbol(NonTerminal.TermPrime)
@@ -473,9 +481,9 @@ namespace Cocompliator
           new StackSymbol( NonTerminal.TermPrime ) 
          );
 
-            // TermPrime -> * Factor [GenMultiply] TermPrime | / Factor [GenDivide] TermPrime | epsilon
+         // TermPrime -> * Factor [GenMultiply] TermPrime | / Factor [GenDivide] TermPrime | epsilon
 
-            AddRule( NonTerminal.TermPrime, TerminalType.Multiply, 
+         AddRule( NonTerminal.TermPrime, TerminalType.Multiply, 
           new StackSymbol( TerminalType.Multiply ), 
           new StackSymbol( NonTerminal.Factor ), 
           new StackSymbol( SemanticAction.GenMultiply ), 
@@ -528,10 +536,14 @@ namespace Cocompliator
          AddRule( NonTerminal.TermPrime, TerminalType.GreaterEqual, 
           Array.Empty<StackSymbol>() 
          );
+         
+         AddRule(NonTerminal.TermPrime, TerminalType.NotEqual,
+          Array.Empty<StackSymbol>()
+         );
 
-            // Factor -> VariableName [GenPushVar] ArrayAccess | Number [GenPushConst] | ( Expression )
+         // Factor -> VariableName [GenPushVar] ArrayAccess | Number [GenPushConst] | ( Expression )
 
-            AddRule( NonTerminal.Factor, TerminalType.VariableName, 
+         AddRule( NonTerminal.Factor, TerminalType.VariableName, 
           new StackSymbol( TerminalType.VariableName ), 
           new StackSymbol( SemanticAction.GenPushVar ), 
           new StackSymbol( NonTerminal.ArrayAccess ) 
@@ -592,7 +604,7 @@ namespace Cocompliator
 
          // ArrayAccess -> [ Expression ] [GenIndex] | epsilon
 
-            AddRule( NonTerminal.ArrayAccess, TerminalType.LeftBracket, 
+         AddRule( NonTerminal.ArrayAccess, TerminalType.LeftBracket, 
           new StackSymbol( TerminalType.LeftBracket ), 
           new StackSymbol( NonTerminal.Expression ), 
           new StackSymbol( TerminalType.RightBracket ), 

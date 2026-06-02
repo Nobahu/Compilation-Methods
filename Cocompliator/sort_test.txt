@@ -1,1 +1,18 @@
 # Коля держит линию электропередач
+string status = "Успешный тест!";
+write(status); # Должно вывести текст на экран
+
+int limit = -10;
+int current = 5;
+
+# Проверка оператора неравенства
+if ( limit == current )
+{
+	write(limit);
+	write(current);
+	write("Коля держит линию электропередач");
+}
+else
+{
+	write("Коля упал");
+}
