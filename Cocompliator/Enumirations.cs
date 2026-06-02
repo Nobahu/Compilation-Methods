@@ -67,7 +67,8 @@ namespace Cocompliator
         /// Функция косинуса числа
         Cos,
         /// Функция экспоненты
-        Exp
+        Exp,
+        String
     }
 
     public enum RPNType
@@ -81,6 +82,8 @@ namespace Cocompliator
         F_Assignment,
         /// Равенство: A == B
         F_Equal,
+        /// Неравенство: A != B
+        F_NotEqual,
         /// Меньше: A < B
         F_Less,
         /// Больше: A > B
@@ -127,6 +130,8 @@ namespace Cocompliator
         F_String,
         /// Объявление переменной bool: bool A
         F_Bool,
+        /// Объявление переменной string
+        F_String,
         /// Объявление массива int: int[] A (размер B) (в RPN: B A F_IntArray)
         F_IntArray,
         /// Объявление массива string: string[] A (размер B)

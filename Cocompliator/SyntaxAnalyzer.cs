@@ -579,6 +579,8 @@ namespace Cocompliator
             new StackSymbol( SemanticAction.GenPushConstText ) 
          );
 
+         // ArrayAccess -> [ Expression ] [GenIndex] | epsilon
+
             AddRule( NonTerminal.ArrayAccess, TerminalType.LeftBracket, 
           new StackSymbol( TerminalType.LeftBracket ), 
           new StackSymbol( NonTerminal.Expression ), 
