@@ -26,7 +26,8 @@ namespace Cocompliator
       WriteStatement, // Оператор вывода
       VarInit, // Инициализация переменной
       IntStatement, // Целочисленный тип данных
-      StringStatement //Строковый тип данных
+      StringStatement, //Строковый тип данных
+      BlockOrStatement
    }
 
    /// @brief Типы семантических действий для генерации ОПС
@@ -904,10 +905,6 @@ namespace Cocompliator
 
             case SemanticAction.GenAssign:
                rpn.Add( new RPNSymbol( RPNType.F_Assignment ) { LinePointer = line, CharPointer = col } );
-               break;
-
-            case SemanticAction.GenNotEqual:
-               rpn.Add( new RPNSymbol( RPNType.F_NotEqual ) { LinePointer = line, CharPointer = col } );
                break;
 
             case SemanticAction.GenNotEqual:

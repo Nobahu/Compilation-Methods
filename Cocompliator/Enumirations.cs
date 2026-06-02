@@ -126,8 +126,6 @@ namespace Cocompliator
         F_Index,
         /// Объявление переменной int: int A
         F_Int,
-        /// Объявление переменной string: string A
-        F_String,
         /// Объявление переменной bool: bool A
         F_Bool,
         /// Объявление переменной string
