@@ -47,6 +47,7 @@ namespace Cocompliator
         While,
         /// Операторы сравнения
         Equal,
+        NotEqual,
         Less,
         Greater,
         LessEqual,

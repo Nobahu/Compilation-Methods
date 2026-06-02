@@ -42,6 +42,7 @@ namespace Cocompliator
       GenAssign,
       // Запись операций сравнения
       GenEqual,
+      GenNotEqual,
       GenLess,
       GenGreater,
       GenLessEqual,
@@ -636,6 +637,12 @@ namespace Cocompliator
           new StackSymbol( SemanticAction.GenGreaterEqual ) 
          );
 
+         AddRule( NonTerminal.ConditionPrime, TerminalType.NotEqual, 
+            new StackSymbol( TerminalType.NotEqual ), 
+            new StackSymbol( NonTerminal.Expression ), 
+            new StackSymbol( SemanticAction.GenNotEqual ) 
+         );
+
          // Read/Write Statements
 
          AddRule( NonTerminal.ReadStatement, TerminalType.Read, 
@@ -860,6 +867,11 @@ namespace Cocompliator
                rpn.Add( new RPNSymbol( RPNType.F_Equal ) { LinePointer = line, CharPointer = col } );
                break;
 
+            case SemanticAction.GenNotEqual:
+               rpn.Add( new RPNSymbol( RPNType.F_Equal ) { LinePointer = line, CharPointer = col } );
+               rpn.Add( new RPNSymbol( RPNType.F_Not ) { LinePointer = line, CharPointer = col } );
+               break;
+
             case SemanticAction.GenLess:
                rpn.Add( new RPNSymbol( RPNType.F_Less ) { LinePointer = line, CharPointer = col } );
                break;
@@ -954,8 +966,8 @@ namespace Cocompliator
                break;
 
             case SemanticAction.GenExp:
-              rpn.Add( new RPNSymbol( RPNType.F_Exp ) { LinePointer = line, CharPointer = col } );
-              break;
+               rpn.Add( new RPNSymbol( RPNType.F_Exp ) { LinePointer = line, CharPointer = col } );
+               break;
 
             case SemanticAction.GenPostIncrement:
                rpn.Add( new RPNSymbol( RPNType.F_PostIncrement ) { LinePointer = line, CharPointer = col } );
