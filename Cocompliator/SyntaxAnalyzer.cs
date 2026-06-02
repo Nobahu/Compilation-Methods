@@ -953,6 +953,10 @@ namespace Cocompliator
                rpn.Add( new RPNSymbol( RPNType.F_Cos ) { LinePointer = line, CharPointer = col } );
                break;
 
+            case SemanticAction.GenExp:
+              rpn.Add( new RPNSymbol( RPNType.F_Exp ) { LinePointer = line, CharPointer = col } );
+              break;
+
             case SemanticAction.GenPostIncrement:
                rpn.Add( new RPNSymbol( RPNType.F_PostIncrement ) { LinePointer = line, CharPointer = col } );
                break;

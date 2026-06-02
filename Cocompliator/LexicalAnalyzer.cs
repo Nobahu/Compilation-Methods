@@ -111,7 +111,6 @@ namespace Cocompliator
             else
                 Terminals.Add(new Terminal(type, line, ch));
         }
-
         private static int GetCharColumn(char c)
         {
             if (char.IsLetter(c) || c == '_') return 0;
