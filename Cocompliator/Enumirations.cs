@@ -81,6 +81,8 @@ namespace Cocompliator
         F_Assignment,
         /// Равенство: A == B
         F_Equal,
+        /// Неравенство: A != B
+        F_NotEqual,
         /// Меньше: A < B
         F_Less,
         /// Больше: A > B

@@ -665,49 +665,39 @@ namespace Cocompliator
          // While
 
          AddRule(NonTerminal.WhileStatement, TerminalType.While,
-         new StackSymbol(TerminalType.While),
-         new StackSymbol(SemanticAction.StartWhile),
-         new StackSymbol(TerminalType.LeftParenthesis),
-         new StackSymbol(NonTerminal.Condition),
-         new StackSymbol(TerminalType.RightParenthesis),
-         new StackSymbol(SemanticAction.WhileCondEnd),
-         new StackSymbol(NonTerminal.Statement),
-         new StackSymbol(SemanticAction.EndWhile));
-
-         AddRule(NonTerminal.WhileStatement, TerminalType.While,
-         new StackSymbol(TerminalType.While),
-         new StackSymbol(SemanticAction.StartWhile),
-         new StackSymbol(TerminalType.LeftParenthesis),
-         new StackSymbol(NonTerminal.Condition),
-         new StackSymbol(TerminalType.RightParenthesis),
-         new StackSymbol(SemanticAction.WhileCondEnd),
-         new StackSymbol(TerminalType.LeftBrace),
-         new StackSymbol(NonTerminal.StatementList),
-         new StackSymbol(TerminalType.RightBrace),
-         new StackSymbol(SemanticAction.EndWhile));
+            new StackSymbol(TerminalType.While),
+            new StackSymbol(SemanticAction.StartWhile),
+            new StackSymbol(TerminalType.LeftParenthesis),
+            new StackSymbol(NonTerminal.Condition),
+            new StackSymbol(TerminalType.RightParenthesis),
+            new StackSymbol(SemanticAction.WhileCondEnd),
+            new StackSymbol(NonTerminal.BlockOrStatement), // Используем строгий блок {}
+            new StackSymbol(SemanticAction.EndWhile)
+         );
 
          // If Statement
 
          AddRule( NonTerminal.IfStatement, TerminalType.If,
-          new StackSymbol( TerminalType.If ), 
-          new StackSymbol( TerminalType.LeftParenthesis ), 
-          new StackSymbol( NonTerminal.Condition ), 
-          new StackSymbol( TerminalType.RightParenthesis ), 
-          new StackSymbol( SemanticAction.IfCondEnd ), 
-          new StackSymbol( NonTerminal.Statement ), 
-          new StackSymbol( NonTerminal.ElsePart ) 
+            new StackSymbol( TerminalType.If ), 
+            new StackSymbol( TerminalType.LeftParenthesis ), 
+            new StackSymbol( NonTerminal.Condition ), 
+            new StackSymbol( TerminalType.RightParenthesis ), 
+            new StackSymbol( SemanticAction.IfCondEnd ), 
+            new StackSymbol( NonTerminal.BlockOrStatement ), // Используем строгий блок {} вместо Statement
+            new StackSymbol( NonTerminal.ElsePart ) 
          );
-
+         
          AddRule( NonTerminal.ElsePart, TerminalType.Else, 
-          new StackSymbol( TerminalType.Else ), 
-          new StackSymbol( SemanticAction.IfElseStart ), 
-          new StackSymbol( NonTerminal.Statement ), 
-          new StackSymbol( SemanticAction.IfElseEnd ) 
+            new StackSymbol( TerminalType.Else ), 
+            new StackSymbol( SemanticAction.IfElseStart ), 
+            new StackSymbol( NonTerminal.BlockOrStatement ), // Используем строгий блок {} вместо Statement
+            new StackSymbol( SemanticAction.IfElseEnd ) 
          );
 
          AddRule( NonTerminal.ElsePart, TerminalType.VariableName, 
           new StackSymbol( SemanticAction.IfElseEnd ) 
          );
+
          AddRule( NonTerminal.ElsePart, TerminalType.If, 
           new StackSymbol( SemanticAction.IfElseEnd ) 
          );
@@ -730,6 +720,12 @@ namespace Cocompliator
 
          AddRule( NonTerminal.ElsePart, TerminalType.Semicolon, 
           new StackSymbol( SemanticAction.IfElseEnd ) 
+         );
+
+         AddRule( NonTerminal.BlockOrStatement, TerminalType.LeftBrace, 
+            new StackSymbol( TerminalType.LeftBrace ), 
+            new StackSymbol( NonTerminal.StatementList ), 
+            new StackSymbol( TerminalType.RightBrace ) 
          );
          }
 
@@ -863,8 +859,8 @@ namespace Cocompliator
                rpn.Add( new RPNSymbol( RPNType.F_Assignment ) { LinePointer = line, CharPointer = col } );
                break;
 
-            case SemanticAction.GenEqual:
-               rpn.Add( new RPNSymbol( RPNType.F_Equal ) { LinePointer = line, CharPointer = col } );
+            case SemanticAction.GenNotEqual:
+               rpn.Add( new RPNSymbol( RPNType.F_NotEqual ) { LinePointer = line, CharPointer = col } );
                break;
 
             case SemanticAction.GenNotEqual:

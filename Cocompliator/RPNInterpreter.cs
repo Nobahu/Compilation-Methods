@@ -334,6 +334,18 @@ namespace Cocompliator
                         iteration = mark.Position.Value - 1;
                         continue;
                     }
+                    else if (symbol.RPNType == RPNType.F_NotEqual)
+                    {
+                        if (stack.Count < 2)
+                            throw new Exception("Error: Недостаточно операндов для операции '!='");
+
+                        double val2 = ResolveValue(stack.Pop(), variables, arrays);
+                        double val1 = ResolveValue(stack.Pop(), variables, arrays);
+
+                        bool result = Math.Abs(val1 - val2) >= 1e-15;
+
+                        stack.Push(new RPNBoolean(RPNType.A_Boolean) { Data = result });
+                    }
                 }
             }
             catch (Exception e)
