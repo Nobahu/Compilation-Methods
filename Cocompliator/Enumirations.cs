@@ -93,6 +93,8 @@ namespace Cocompliator
         F_Plus,
         /// Вычитание/унарный минус: A - B или -A
         F_Minus,
+        /// Унарный минус
+        F_UMinus,
         /// Умножение: A * B
         F_Multiply,
         /// Деление: A / B

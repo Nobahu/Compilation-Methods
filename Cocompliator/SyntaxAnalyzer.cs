@@ -47,6 +47,7 @@ namespace Cocompliator
       GenGreater,
       GenLessEqual,
       GenGreaterEqual,
+      GenUMinus,
       // Запись функций ввода и вывода
       GenRead,
       GenWrite,
@@ -340,9 +341,14 @@ namespace Cocompliator
           new StackSymbol( NonTerminal.ExpressionPrime ) 
          );
 
-         // ExpressionPrime -> + Term [GenPlus] ExpressionPrime | - Term [GenMinus] ExpressionPrime | epsilon
+          AddRule(NonTerminal.Expression, TerminalType.Minus,
+          new StackSymbol(NonTerminal.Term),
+          new StackSymbol(NonTerminal.ExpressionPrime)
+          );
 
-         AddRule( NonTerminal.ExpressionPrime, TerminalType.Plus, 
+            // ExpressionPrime -> + Term [GenPlus] ExpressionPrime | - Term [GenMinus] ExpressionPrime | epsilon
+
+            AddRule( NonTerminal.ExpressionPrime, TerminalType.Plus, 
           new StackSymbol( TerminalType.Plus ), 
           new StackSymbol( NonTerminal.Term ), 
           new StackSymbol( SemanticAction.GenPlus ), 
@@ -425,9 +431,15 @@ namespace Cocompliator
           new StackSymbol( NonTerminal.TermPrime ) 
          );
 
-         // TermPrime -> * Factor [GenMultiply] TermPrime | / Factor [GenDivide] TermPrime | epsilon
+            // Term -> Factor TermPrime  (для случая, когда начинается с минуса)
+        AddRule(NonTerminal.Term, TerminalType.Minus,
+            new StackSymbol(NonTerminal.Factor),
+            new StackSymbol(NonTerminal.TermPrime)
+        );
 
-         AddRule( NonTerminal.TermPrime, TerminalType.Multiply, 
+            // TermPrime -> * Factor [GenMultiply] TermPrime | / Factor [GenDivide] TermPrime | epsilon
+
+            AddRule( NonTerminal.TermPrime, TerminalType.Multiply, 
           new StackSymbol( TerminalType.Multiply ), 
           new StackSymbol( NonTerminal.Factor ), 
           new StackSymbol( SemanticAction.GenMultiply ), 
@@ -481,9 +493,9 @@ namespace Cocompliator
           Array.Empty<StackSymbol>() 
          );
 
-         // Factor -> VariableName [GenPushVar] ArrayAccess | Number [GenPushConst] | ( Expression )
+            // Factor -> VariableName [GenPushVar] ArrayAccess | Number [GenPushConst] | ( Expression )
 
-         AddRule( NonTerminal.Factor, TerminalType.VariableName, 
+            AddRule( NonTerminal.Factor, TerminalType.VariableName, 
           new StackSymbol( TerminalType.VariableName ), 
           new StackSymbol( SemanticAction.GenPushVar ), 
           new StackSymbol( NonTerminal.ArrayAccess ) 
@@ -531,10 +543,15 @@ namespace Cocompliator
             new StackSymbol( TerminalType.RightParenthesis ), 
             new StackSymbol( SemanticAction.GenExp ) 
          );
+         AddRule(NonTerminal.Factor, TerminalType.Minus,
+            new StackSymbol(TerminalType.Minus),
+            new StackSymbol(NonTerminal.Factor),
+            new StackSymbol(SemanticAction.GenUMinus)
+         );
 
-         // ArrayAccess -> [ Expression ] [GenIndex] | epsilon
+            // ArrayAccess -> [ Expression ] [GenIndex] | epsilon
 
-         AddRule( NonTerminal.ArrayAccess, TerminalType.LeftBracket, 
+            AddRule( NonTerminal.ArrayAccess, TerminalType.LeftBracket, 
           new StackSymbol( TerminalType.LeftBracket ), 
           new StackSymbol( NonTerminal.Expression ), 
           new StackSymbol( TerminalType.RightBracket ), 
@@ -976,7 +993,11 @@ namespace Cocompliator
             case SemanticAction.GenPostDecrement:
                rpn.Add( new RPNSymbol( RPNType.F_PostDecrement ) { LinePointer = line, CharPointer = col } );
                break;
-         }
+
+            case SemanticAction.GenUMinus:
+                rpn.Add(new RPNSymbol(RPNType.F_UMinus) { LinePointer = line, CharPointer = col });
+                break;
+            }
       }
    }
 }

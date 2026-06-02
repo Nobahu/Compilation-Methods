@@ -105,6 +105,14 @@ namespace Cocompliator
 
                         stack.Push(new RPNNumber(RPNType.A_Number) { Data = (int)result, DoubleData = result });
                     }
+                    else if (symbol.RPNType == RPNType.F_UMinus)
+                    {
+                        if (stack.Count < 1)
+                            throw new Exception("Error: Недостаточно операндов для унарного минуса");
+
+                        double val = ResolveValue(stack.Pop(), variables, arrays);
+                        stack.Push(new RPNNumber(RPNType.A_Number) { DoubleData = -val });
+                    }
                     /// Постфиксный инкремент (x++)
                     else if (symbol.RPNType == RPNType.F_PostIncrement)
                     {
