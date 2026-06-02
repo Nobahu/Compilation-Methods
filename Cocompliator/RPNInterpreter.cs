@@ -383,7 +383,10 @@ namespace Cocompliator
                     }
                     else if (symbol.RPNType == RPNType.F_String)
                     {
-                        var target = stack.Pop() as RPNIdentifier;
+                        if (stack.Count < 1)
+                            throw new Exception("Error: Отсутствует идентификатор для объявления string");
+
+                        var target = stack.Peek() as RPNIdentifier;
                         if (target == null)
                             throw new Exception("Error: Ожидался идентификатор при объявлении string");
                         stringVariables[target.Name] = "";
