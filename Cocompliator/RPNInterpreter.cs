@@ -245,18 +245,6 @@ namespace Cocompliator
 
                         stack.Push(new RPNNumber(RPNType.A_Number) { DoubleData = res });
                     }
-                    /// Функция возведения в степень (pow)
-                    else if (symbol.RPNType == RPNType.F_Pow)
-                    {
-                        if (stack.Count < 2)
-                            throw new Exception("Error: недостаточно операндов для функции pow.");
-
-                        double val2 = ResolveValue(stack.Pop(), variables, arrays); /// степень
-                        double val1 = ResolveValue(stack.Pop(), variables, arrays); /// основание
-
-                        stack.Push(new RPNNumber(RPNType.A_Number) { DoubleData = Math.Pow(val1, val2) });
-                    }
-
                     /// ОПЕРАТОРЫ СРАВНЕНИЯ
                     /// Оператор >
                     else if (symbol.RPNType == RPNType.F_Greater)
