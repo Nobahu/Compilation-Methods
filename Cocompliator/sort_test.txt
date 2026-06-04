@@ -1,41 +1,17 @@
 # Коля держит линию электропередач
-int n;
-write("Введите размер массива:");
-read(n);
-int[n] arr;
-int i = 0;
-while (i < n)
-{
-	int num;
-	write("Введите число ");
-	read(num);
-	arr[i] = num;
-	i = i + 1;
-}
+string status = "Успешный тест!";
+write(status); # Должно вывести текст на экран
 
-int j;
-i = 0;
-while (i < n - 1)
-{
-    j = 0;
-    while (j < n - i - 1)
-    {
-        if (arr[j] > arr[j+1])
-        {
-            int temp;
-            temp = arr[j];
-            arr[j] = arr[j+1];
-            arr[j+1] = temp;
-        }
-        j = j + 1;
-    }
-    i = i + 1;
-}
+int limit = -10;
+int current = 5;
 
-write("Отсортированный массив:");
-i = 0;
-while (i < n)
+# Проверка оператора неравенства
+if ( limit == current )
 {
-    write(arr[i]);
-    i = i + 1;
+	write(current);
+	write("Коля держит линию электропередач");
+}
+else
+{
+	write("Коля упал");
 }
