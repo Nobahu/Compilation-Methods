@@ -13,7 +13,7 @@ namespace Cocompliator
 
         public static bool IsLexicalCorrect(string data)
         {
-            Data = data + " ";
+            Data = data + " "; // Добавлен пробел для гарантированного чтения последнего токена
             _pointer = 0;
             _charPointer = 1;
             _linePointer = 1;
@@ -38,7 +38,7 @@ namespace Cocompliator
 
                 if (action.IsError)
                 {
-                    throw new CompilerException($"Лексическая ошибка: неожиданный символ '{c}'", _linePointer, _charPointer);
+                    throw CompilerException.LexicalUnexpectedChar(c, _linePointer, _charPointer);
                 }
 
                 if (action.NextState != -1)
@@ -49,14 +49,8 @@ namespace Cocompliator
                     }
                     else
                     {
-                        if ((state == 11 || state == 12) && action.NextState == 0)
-                        {
-                            buffer = "";
-                        }
-                        else
-                        {
-                            buffer += c;
-                        }
+                        if ((state == 11 || state == 12) && action.NextState == 0) buffer = "";
+                        else buffer += c;
 
                         state = action.NextState;
                         AdvancePointer();
@@ -80,6 +74,13 @@ namespace Cocompliator
                     buffer = "";
                 }
             }
+
+            // Проверка на незакрытую строку в конце файла
+            if (state == 12)
+            {
+                throw CompilerException.LexicalUnclosedString(_linePointer, _charPointer);
+            }
+
             return true;
         }
 
@@ -112,18 +113,14 @@ namespace Cocompliator
 
         private static void SaveTerminal(TerminalType type, string value, int line, int ch)
         {
-            if (type == TerminalType.Number)
-                Terminals.Add(new Terminal.Number(type, line, ch, value));
-            else if (type == TerminalType.VariableName || type == TerminalType.Text)
-                Terminals.Add(new Terminal.Identifier(type, line, ch, value));
-            else
-                Terminals.Add(new Terminal(type, line, ch));
+            if (type == TerminalType.Number) Terminals.Add(new Terminal.Number(type, line, ch, value));
+            else if (type == TerminalType.VariableName || type == TerminalType.Text) Terminals.Add(new Terminal.Identifier(type, line, ch, value));
+            else Terminals.Add(new Terminal(type, line, ch));
         }
+
         private static int GetCharColumn(char c)
         {
-            // Проверка на латиницу (A-Z, a-z) и подчеркивание
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') return 0;
-            
             if (char.IsDigit(c)) return 1;
             if (c == '+') return 2;
             if (c == '-') return 3;
@@ -146,9 +143,6 @@ namespace Cocompliator
             if (c == '#') return 19;
             if (c == '&') return 20;
             if (c == '"') return 21;
-            
-            // Если символ не подошел ни под одно условие выше, он попадает сюда.
-            // Колонка 23 должна вызывать ошибку (IsError = true) в таблице переходов для начального состояния.
             return 23; 
         }
 

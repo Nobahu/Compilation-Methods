@@ -3,37 +3,39 @@ using System.IO;
 
 namespace Cocompliator
 {
-    // Главный класс программы, отвечающий за запуск
     public static class Programm
     {
         public static void Main()
         {
             try
             {
-                // Название нашего файла с формулой
-                string testFileName = "C:\\Users\\user\\source\\repos\\Cocompliator\\Cocompliator\\Tests\\error_2.txt";
-                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, testFileName);
+                // Универсальный путь к файлу теста. Ищет папку Tests в корне проекта.
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string projectDir = Directory.GetParent(baseDir).Parent.Parent.Parent.FullName;
+                string filePath = Path.Combine(projectDir, "Tests", "sort_test.txt");
                 
-                // Чтение исходного кода из файла через ваш FileReader
                 var code = FileReader.Read(filePath);
 
-                // Лексический анализ кода
                 LexicalAnalyzer.IsLexicalCorrect(code);
                 var terminals = LexicalAnalyzer.GetTerminals();
 
-                // Трансляция терминалов в ОПС
                 var rpn = SyntaxAnalyzer.GenerateRPN(terminals);
 
-                // Выполнение формулы
                 RPNInterpreter.ExecuteInstructions(rpn);
             }
             catch (CompilerException ex)
             {
-                Console.WriteLine($"\nОшибка компиляции: {ex.Message} на строке {ex.LineNumber} на позиции {ex.CharPosition}");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n[ОШИБКА КОМПИЛЯЦИИ/ВЫПОЛНЕНИЯ]");
+                Console.WriteLine($"{ex.Message}");
+                Console.WriteLine($"---> Строка: {ex.LineNumber}, Символ: {ex.CharPosition}");
+                Console.ResetColor();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{ex.Message}");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine($"\n[КРИТИЧЕСКАЯ СИСТЕМНАЯ ОШИБКА]: {ex.Message}");
+                Console.ResetColor();
             }
         }
     }
