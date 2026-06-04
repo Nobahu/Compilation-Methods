@@ -2,6 +2,7 @@ using System;
 
 namespace Cocompliator
 {
+    /// @brief Класс, отвечающий за вывод ошибок
     public class CompilerException : Exception
     {
         public int LineNumber { get; set; }
@@ -12,10 +13,6 @@ namespace Cocompliator
             LineNumber = lineNumber;
             CharPosition = charPosition;
         }
-
-        // ==========================================================
-        // ЦЕНТРАЛИЗОВАННЫЙ РЕЕСТР ОШИБОК
-        // ==========================================================
 
         // --- 1. ЛЕКСИЧЕСКИЕ ОШИБКИ ---
         public static CompilerException LexicalUnexpectedChar(char c, int line, int col) =>
@@ -74,10 +71,13 @@ namespace Cocompliator
         public static CompilerException RuntimeTypeError(string expected, int line, int col) =>
             new CompilerException($"Ошибка типов: Ожидался тип {expected}.", line, col);
 
+        public static CompilerException RuntimeNegativeMultiplier(int line, int col) => 
+            new CompilerException("Отрицательный множитель для строки", line, col);
 
-        public static CompilerException RuntimeNegativeMultiplier(int line, int col)
-    => new CompilerException("Отрицательный множитель для строки", line, col);
-        public static CompilerException RuntimeInvalidStringMultiplication(int line, int col)
-            => new CompilerException("Операция '*' требует строку и число", line, col);
+        public static CompilerException RuntimeInvalidStringMultiplication(int line, int col) => 
+            new CompilerException("Операция '*' требует строку и число", line, col);
+
+        public static CompilerException VariableAlreadyDeclared(string varName, int line, int col) => 
+            new CompilerException($"Переменная '{varName}' уже объявлена", line, col);
     }
 }

@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Cocompliator
 {
+   /// @brief Лексемы исходного языка(терминалы)
    public enum TerminalType
     {
         /// Константа
@@ -19,10 +20,8 @@ namespace Cocompliator
         Minus,
         Multiply,
         Divide,
-        /// Логические операторы
+        /// Логический операторы
         Not,
-        And,
-        Or,
         /// Левая круглая скобка
         LeftParenthesis,
         /// Правая круглая скобка
@@ -69,6 +68,7 @@ namespace Cocompliator
         String
     }
 
+    /// @brief Типы (операции, аргументы и т.п) используемые в интерпретаторе
     public enum RPNType
     {
         // ОПЕРАЦИИ (F_)
@@ -108,8 +108,6 @@ namespace Cocompliator
         F_PostDecrement,
         /// Логические операторы
         F_Not,
-        F_And,
-        F_Or,
         /// Квадратный корень: sqrt(A)
         F_Sqrt,
         /// Вычисление синуса: sin(A)
@@ -128,10 +126,6 @@ namespace Cocompliator
         F_String,
         /// Объявление массива int: int[] A (размер B) (в RPN: B A F_IntArray)
         F_IntArray,
-        /// Объявление массива string: string[] A (размер B)
-        F_StringArray,
-        /// Объявление массива bool: bool[] A (размер B)
-        F_BoolArray,
         // АРГУМЕНТЫ/ОПЕРАНДЫ (A_)
         /// Числовой литерал
         A_Number,

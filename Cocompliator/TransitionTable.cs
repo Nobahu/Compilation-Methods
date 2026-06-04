@@ -15,6 +15,7 @@ namespace Cocompliator
         public static StateTransition Skip() => new StateTransition { NextState = 0 };
     }
 
+    /// @brief Класс, представляющий собой таблицу переходов
     public static class TransitionTable
     {
         public static readonly StateTransition[,] Matrix = new StateTransition[13, 24];
@@ -25,7 +26,7 @@ namespace Cocompliator
                 for (int j = 0; j < 24; j++)
                     Matrix[i, j] = StateTransition.Error();
 
-            // s0
+            // s0 (начало лексемы)
             Matrix[0, 0] = StateTransition.GoTo(1);
             Matrix[0, 1] = StateTransition.GoTo(2);
             Matrix[0, 2] = StateTransition.GoTo(3);
@@ -43,77 +44,77 @@ namespace Cocompliator
             Matrix[0, 14] = StateTransition.Z(TerminalType.LeftBrace);
             Matrix[0, 15] = StateTransition.Z(TerminalType.RightBrace);
             Matrix[0, 16] = StateTransition.Z(TerminalType.Semicolon);
-            Matrix[0, 17] = StateTransition.Skip();
-            Matrix[0, 18] = StateTransition.Skip();
+            Matrix[0, 17] = StateTransition.Skip(); /// Не используется
+            Matrix[0, 18] = StateTransition.Skip(); /// Пробел или табуляция (игнорируем)
             Matrix[0, 19] = StateTransition.GoTo(11);
-            Matrix[0, 20] = StateTransition.Skip();
+            Matrix[0, 20] = StateTransition.Skip(); /// Не используется
             Matrix[0, 21] = StateTransition.GoTo(12);
-            Matrix[0, 22] = StateTransition.Skip();
+            Matrix[0, 22] = StateTransition.Skip(); /// Перевод строки (игнорируем)
 
-            // s1
+            // s1 (идентификатор, ключевое слово)
             Matrix[1, 0] = StateTransition.GoTo(1);
             Matrix[1, 1] = StateTransition.GoTo(1);
             for (int j = 2; j < 24; j++) Matrix[1, j] = StateTransition.ZStar(TerminalType.VariableName, true);
 
-            // s2
+            // s2 (число)
             Matrix[2, 0] = StateTransition.Error();
             Matrix[2, 1] = StateTransition.GoTo(2);
             for (int j = 2; j < 24; j++) Matrix[2, j] = StateTransition.ZStar(TerminalType.Number);
 
-            // s3
+            // s3 (+)
             for (int j = 0; j < 24; j++) Matrix[3, j] = StateTransition.ZStar(TerminalType.Plus);
 
-            // s4
+            // s4 (-)
             for (int j = 0; j < 24; j++) Matrix[4, j] = StateTransition.ZStar(TerminalType.Minus);
 
-            // s5
-            Matrix[5, 6] = StateTransition.Z(TerminalType.Equal);
+            // s5 (=)
+            Matrix[5, 6] = StateTransition.Z(TerminalType.Equal); /// Если следующий символ также = -> Equal
             for (int j = 0; j < 24; j++) if (j != 6) Matrix[5, j] = StateTransition.ZStar(TerminalType.Assignment);
 
-            // s6
-            Matrix[6, 6] = StateTransition.Z(TerminalType.LessEqual);
+            // s6 (<)
+            Matrix[6, 6] = StateTransition.Z(TerminalType.LessEqual); /// Если следующий символ также = -> LessEqual
             for (int j = 0; j < 24; j++) if (j != 6) Matrix[6, j] = StateTransition.ZStar(TerminalType.Less);
 
-            // s7
-            Matrix[7, 6] = StateTransition.Z(TerminalType.GreaterEqual);
+            // s7 (>)
+            Matrix[7, 6] = StateTransition.Z(TerminalType.GreaterEqual); /// Если следующий символ также = -> GreaterEqual
             for (int j = 0; j < 24; j++) if (j != 6) Matrix[7, j] = StateTransition.ZStar(TerminalType.Greater);
 
-            // s8
-            Matrix[8, 6] = StateTransition.Z(TerminalType.NotEqual); 
+            // s8 (!)
+            Matrix[8, 6] = StateTransition.Z(TerminalType.NotEqual); /// Если следующий символ также = -> NotEqual
             for (int j = 0; j < 24; j++) 
             {
                 if (j != 6) Matrix[8, j] = StateTransition.ZStar(TerminalType.Not); 
             }
 
-            // s9
+            // s9 (*)
             for (int j = 0; j < 24; j++) Matrix[9, j] = StateTransition.ZStar(TerminalType.Multiply);
 
-            // s10
+            // s10 (/)
             for (int j = 0; j < 24; j++) Matrix[10, j] = StateTransition.ZStar(TerminalType.Divide);
             
-            // s11
+            // s11 (комментарий)
             for (int j = 0; j < 24; j++)
             {
-                if (j == 22) // Колонка 22 соответствует символу новой строки '\n'
+                if (j == 22) /// Колонка 22 соответствует символу новой строки '\n'
                 {
-                    Matrix[11, j] = StateTransition.Skip(); // Завершаем комментарий, возвращаемся в s0
+                    Matrix[11, j] = StateTransition.Skip(); /// Завершаем комментарий, возвращаемся в s0
                 }
                 else
                 {
-                    Matrix[11, j] = StateTransition.GoTo(11); // Все остальные символы просто поглощаем
+                    Matrix[11, j] = StateTransition.GoTo(11); /// Все остальные символы просто поглощаем
                 }
             }
 
-            // s12
+            // s12 (строковый литерал)
             for (int j = 0; j < 24; j++)
             {
                 if (j == 21) // Если встретили закрывающую кавычку '"'
                 {
-                    Matrix[12, j] = StateTransition.Z(TerminalType.Text); // Завершаем разбор, возвращаем Text
+                    Matrix[12, j] = StateTransition.Z(TerminalType.Text); /// Завершаем разбор, возвращаем Text
                 }
                 else
                 {
-                    Matrix[12, j] = StateTransition.GoTo(12); // Все остальные символы внутри кавычек поглощаем
+                    Matrix[12, j] = StateTransition.GoTo(12); /// Все остальные символы внутри кавычек поглощаем
                 }
             }
         }

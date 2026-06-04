@@ -13,7 +13,7 @@ namespace Cocompliator
 
         public static bool IsLexicalCorrect(string data)
         {
-            Data = data + " "; // Добавлен пробел для гарантированного чтения последнего токена
+            Data = data + " "; /// Добавлен пробел для гарантированного чтения последнего токена
             _pointer = 0;
             _charPointer = 1;
             _linePointer = 1;
@@ -34,6 +34,7 @@ namespace Cocompliator
                     startChar = _charPointer;
                 }
 
+                /// Получение действия из таблицы переходов
                 StateTransition action = TransitionTable.Matrix[state, col];
 
                 if (action.IsError)
@@ -75,7 +76,7 @@ namespace Cocompliator
                 }
             }
 
-            // Проверка на незакрытую строку в конце файла
+            /// Проверка на незакрытую строку в конце файла
             if (state == 12)
             {
                 throw CompilerException.LexicalUnclosedString(_linePointer, _charPointer);
@@ -119,7 +120,7 @@ namespace Cocompliator
             }
             else if (type == TerminalType.VariableName || type == TerminalType.Text)
             {
-                // Если это строковый литерал – удаляем окружающие кавычки
+                /// Если это строковый литерал – удаляем окружающие кавычки
                 if (type == TerminalType.Text && value.Length >= 2 && value[0] == '"' && value[value.Length - 1] == '"')
                 {
                     value = value.Substring(1, value.Length - 2);
@@ -154,8 +155,8 @@ namespace Cocompliator
             if (c == ',') return 17;
             if (c == ' ' || c == '\r' || c == '\t') return 18;
             if (c == '\n') return 22;
-            if (c == '#') return 19;
-            if (c == '&') return 20;
+            if (c == '#') return 19; 
+            if (c == '&') return 20; /// Не используется
             if (c == '"') return 21;
             return 23; 
         }

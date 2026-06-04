@@ -3,26 +3,27 @@ int n = 2;
 while (i < n)
 {
     write("Коля упал");
-    i = i + 1;
+    i = i + 2;
+    i--;
 }
 
 i = 0;
 while (i <= n)
 {
     write("Коля упал");
-    i = i + 1;
+    i++;
 }
 
 i = 0;
 while (i >= n)
 {
     write("Коля упал");
-    i = i + 1;
+    i++;
 }
 
 i = 0;
 while (i > n)
 {
     write("Коля упал");
-    i = i + 1;
+    i++;
 }

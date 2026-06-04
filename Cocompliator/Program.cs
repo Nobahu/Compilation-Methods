@@ -9,10 +9,10 @@ namespace Cocompliator
         {
             try
             {
-                // Универсальный путь к файлу теста. Ищет папку Tests в корне проекта.
+                /// Универсальный путь к файлу теста. Ищет папку Tests в корне проекта.
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 string projectDir = Directory.GetParent(baseDir).Parent.Parent.Parent.FullName;
-                string filePath = Path.Combine(projectDir, "Tests", "error_1.txt");
+                string filePath = Path.Combine(projectDir, "Tests", "while_test.txt");
                 
                 var code = FileReader.Read(filePath);
 

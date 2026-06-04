@@ -15,7 +15,7 @@ namespace Cocompliator
       Term,                 // Слагаемое
       TermPrime,            // Правая часть слагаемого
       Factor,               // Множитель
-      ArrayAccess,          //Работа с массивом
+      ArrayAccess,          // Работа с массивом
       Condition,            // Логическое условие
       ConditionPrime,       // Операция сравнения в условии
       IfStatement,          // Условный оператор if
@@ -33,6 +33,7 @@ namespace Cocompliator
    {
       GenPushVar,          // Запись имени переменной в ОПС
       GenPushConst,        // Запись числовой константы в ОПС
+      GenPushConstText,    // Запись строкового литерала (текста в кавычках) в ОПС
       GenPlus,             // Операция сложения (+)
       GenMinus,            // Операция вычитания (-)
       GenMultiply,         // Операция умножения (*)
@@ -57,7 +58,6 @@ namespace Cocompliator
       GenPostDecrement,    // Операция постфиксного декремента (--)
       GenExp,              // Вычисление экспоненты (exp)
       GenStringDecl,       // Объявление переменной типа string
-      GenPushConstText,    // Запись строкового литерала (текста в кавычках) в ОПС
       StartWhile,          // Установка метки начала цикла while
       WhileCondEnd,        // Генерация условного перехода при ложности условия цикла
       EndWhile,            // Возврат к началу цикла и установка метки выхода из while
@@ -67,7 +67,7 @@ namespace Cocompliator
    }
 
    public enum StackSymbolType { Terminal, NonTerminal, Action }
-
+   
    public class StackSymbol
    {
       public StackSymbolType Type { get; set; }
@@ -138,6 +138,11 @@ namespace Cocompliator
           new StackSymbol(NonTerminal.StatementList)
          );
 
+         AddRule(NonTerminal.StatementList, TerminalType.String,
+          new StackSymbol(NonTerminal.Statement),
+          new StackSymbol(NonTerminal.StatementList)
+         );
+
          AddRule(NonTerminal.StatementList, TerminalType.If,
           new StackSymbol(NonTerminal.Statement),
           new StackSymbol(NonTerminal.StatementList)
@@ -166,11 +171,6 @@ namespace Cocompliator
 
          AddRule(NonTerminal.StatementList, TerminalType.RightBrace,
           Array.Empty<StackSymbol>()
-         );
-
-         AddRule(NonTerminal.StatementList, TerminalType.String,
-          new StackSymbol(NonTerminal.Statement),
-          new StackSymbol(NonTerminal.StatementList)
          );
 
          //Statement -> Variable [GenPushVar] StatementSuffix | If | While | Read | Write
@@ -773,7 +773,8 @@ namespace Cocompliator
             {
                if (currentToken == null || currentToken.TerminalType != top.Terminal)
                {
-                  throw CompilerException.SyntaxTerminalMismatch(top.Terminal.ToString(), currentToken?.TerminalType.ToString() ?? "конец файла", currentToken?.LinePointer ?? -1, currentToken?.CharPointer ?? -1);
+                  throw CompilerException.SyntaxTerminalMismatch(top.Terminal.ToString(), currentToken?.TerminalType.ToString() ?? 
+                      "конец файла", currentToken?.LinePointer ?? -1, currentToken?.CharPointer ?? -1);
                }
                lastTerminal = currentToken;
                currentTokenIndex++;
@@ -783,7 +784,8 @@ namespace Cocompliator
                if (currentToken == null)
                {
                     if (top.NonTerminal == NonTerminal.ElsePart) { parseStack.Push(new StackSymbol(SemanticAction.IfElseEnd)); continue; }
-                    if (top.NonTerminal == NonTerminal.StatementList || top.NonTerminal == NonTerminal.ExpressionPrime || top.NonTerminal == NonTerminal.TermPrime || top.NonTerminal == NonTerminal.ArrayAccess) { continue; }
+                    if (top.NonTerminal == NonTerminal.StatementList || top.NonTerminal == NonTerminal.ExpressionPrime 
+                            || top.NonTerminal == NonTerminal.TermPrime || top.NonTerminal == NonTerminal.ArrayAccess) { continue; }
                     throw CompilerException.SyntaxUnexpectedEOF(lastTerminal?.LinePointer ?? 1, lastTerminal?.CharPointer ?? 1);
                }
 
