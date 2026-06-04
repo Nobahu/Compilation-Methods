@@ -789,44 +789,44 @@ namespace Cocompliator
                break;
 
             case SemanticAction.GenNotEqual: 
-             rpn.Add(new RPNSymbol(RPNType.F_NotEqual) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_NotEqual) { LinePointer = line, CharPointer = col }); 
+               break;
 
             case SemanticAction.GenLess: 
-             rpn.Add(new RPNSymbol(RPNType.F_Less) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_Less) { LinePointer = line, CharPointer = col }); 
+               break;
 
             case SemanticAction.GenGreater: 
-             rpn.Add(new RPNSymbol(RPNType.F_Greater) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_Greater) { LinePointer = line, CharPointer = col }); 
+               break;
 
             case SemanticAction.GenLessEqual: 
-             rpn.Add(new RPNSymbol(RPNType.F_LessEqual) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_LessEqual) { LinePointer = line, CharPointer = col }); 
+               break;
 
             case SemanticAction.GenGreaterEqual: 
-             rpn.Add(new RPNSymbol(RPNType.F_GreaterEqual) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_GreaterEqual) { LinePointer = line, CharPointer = col }); 
+               break;
 
             case SemanticAction.GenRead:
-             rpn.Add(new RPNSymbol(RPNType.F_Read) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_Read) { LinePointer = line, CharPointer = col }); 
+               break;
 
             case SemanticAction.GenWrite: 
-             rpn.Add(new RPNSymbol(RPNType.F_Write) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_Write) { LinePointer = line, CharPointer = col }); 
+               break;
 
             case SemanticAction.GenIndex:
-             rpn.Add(new RPNSymbol(RPNType.F_Index) { LinePointer = line, CharPointer = col });
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_Index) { LinePointer = line, CharPointer = col });
+               break;
 
             case SemanticAction.GenIntDecl: 
-             rpn.Add(new RPNSymbol(RPNType.F_Int) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_Int) { LinePointer = line, CharPointer = col }); 
+               break;
             
             case SemanticAction.GenStringDecl: 
-             rpn.Add(new RPNSymbol(RPNType.F_String) { LinePointer = line, CharPointer = col }); 
-             break;
+               rpn.Add(new RPNSymbol(RPNType.F_String) { LinePointer = line, CharPointer = col }); 
+               break;
 
             case SemanticAction.GenPushConstText:
                if (last is Terminal.Identifier textNode) rpn.Add(new RPNTextLine(RPNType.A_TextLine) { Data = textNode.Name, LinePointer = line, CharPointer = col });
@@ -850,16 +850,35 @@ namespace Cocompliator
 
             case SemanticAction.EndWhile:
                var exitLabel = labels.Pop(); var backLabel = labels.Pop();
-               rpn.Add(backLabel); rpn.Add(new RPNSymbol(RPNType.F_UnconditionalJumpToMark) { LinePointer = line, CharPointer = col }); exitLabel.Position = rpn.Count; rpn.Add(exitLabel); break;
+               rpn.Add(backLabel); 
+               rpn.Add(new RPNSymbol(RPNType.F_UnconditionalJumpToMark) { LinePointer = line, CharPointer = col });
+               exitLabel.Position = rpn.Count;
+               rpn.Add(exitLabel); 
+               break;
+
             case SemanticAction.IfCondEnd:
                var falseLabel = new RPNMark(RPNType.М_Mark, MarkType.IfMark) { LinePointer = line, CharPointer = col };
-               rpn.Add(falseLabel); rpn.Add(new RPNSymbol(RPNType.F_ConditionalJumpToMark) { LinePointer = line, CharPointer = col }); labels.Push(falseLabel); break;
+               rpn.Add(falseLabel); 
+               rpn.Add(new RPNSymbol(RPNType.F_ConditionalJumpToMark) { LinePointer = line, CharPointer = col }); 
+               labels.Push(falseLabel); 
+               break;
+
             case SemanticAction.IfElseStart:
                var skipElseLabel = new RPNMark(RPNType.М_Mark, MarkType.ElseMark) { LinePointer = line, CharPointer = col };
-               rpn.Add(skipElseLabel); rpn.Add(new RPNSymbol(RPNType.F_UnconditionalJumpToMark) { LinePointer = line, CharPointer = col });
-               var prevFalseLabel = labels.Pop(); prevFalseLabel.Position = rpn.Count; rpn.Add(prevFalseLabel); labels.Push(skipElseLabel); break;
+               rpn.Add(skipElseLabel); 
+               rpn.Add(new RPNSymbol(RPNType.F_UnconditionalJumpToMark) { LinePointer = line, CharPointer = col });
+               var prevFalseLabel = labels.Pop(); 
+               prevFalseLabel.Position = rpn.Count; 
+               rpn.Add(prevFalseLabel); 
+               labels.Push(skipElseLabel); 
+               break;
+               
             case SemanticAction.IfElseEnd:
-               var finalLabel = labels.Pop(); finalLabel.Position = rpn.Count; rpn.Add(finalLabel); break;
+               var finalLabel = labels.Pop(); 
+               finalLabel.Position = rpn.Count; 
+               rpn.Add(finalLabel); 
+               break;
+
             case SemanticAction.GenSqrt: rpn.Add(new RPNSymbol(RPNType.F_Sqrt) { LinePointer = line, CharPointer = col }); break;
             case SemanticAction.GenSin: rpn.Add(new RPNSymbol(RPNType.F_Sin) { LinePointer = line, CharPointer = col }); break;
             case SemanticAction.GenCos: rpn.Add(new RPNSymbol(RPNType.F_Cos) { LinePointer = line, CharPointer = col }); break;
