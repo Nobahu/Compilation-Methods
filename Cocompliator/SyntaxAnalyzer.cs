@@ -6,19 +6,64 @@ namespace Cocompliator
 {
    public enum NonTerminal
    {
-      Program, StatementList, Statement, StatementSuffix, Expression, ExpressionPrime, 
-      Term, TermPrime, Factor, ArrayAccess, Condition, ConditionPrime, IfStatement, 
-      ElsePart, WhileStatement, ReadStatement, WriteStatement, VarInit, IntStatement, 
-      StringStatement, BlockOrStatement
+      Program,              // Вся программа 
+      StatementList,        // Список инструкций
+      Statement,            // Инструкция (оператор)
+      StatementSuffix,      // Хвост инструкции
+      Expression,           // Выражение
+      ExpressionPrime,      // Правая часть выражения
+      Term,                 // Слагаемое
+      TermPrime,            // Правая часть слагаемого
+      Factor,               // Множитель
+      ArrayAccess,          //Работа с массивом
+      Condition,            // Логическое условие
+      ConditionPrime,       // Операция сравнения в условии
+      IfStatement,          // Условный оператор if
+      ElsePart,             // Необязательная ветка else
+      WhileStatement,       // Цикл повторения while
+      ReadStatement,        // Инструкция ввода  данных
+      WriteStatement,       // Инструкция вывода данных
+      VarInit,              // Инициализатор переменной
+      IntStatement,         // Объявление целочисленной переменной
+      StringStatement,      // Объявление строковой переменной
+      BlockOrStatement      // Локальная область
    }
 
    public enum SemanticAction
    {
-      GenPushVar, GenPushConst, GenPlus, GenMinus, GenMultiply, GenDivide, GenAssign,
-      GenEqual, GenNotEqual, GenLess, GenGreater, GenLessEqual, GenGreaterEqual, GenUMinus,
-      GenRead, GenWrite, GenIndex, GenArrayDecl, GenIntDecl, GenSqrt, GenSin, GenCos, 
-      GenPostIncrement, GenPostDecrement, GenExp, GenStringDecl, GenPushConstText,
-      StartWhile, WhileCondEnd, EndWhile, IfCondEnd, IfElseStart, IfElseEnd
+      GenPushVar,          // Запись имени переменной в ОПС
+      GenPushConst,        // Запись числовой константы в ОПС
+      GenPlus,             // Операция сложения (+)
+      GenMinus,            // Операция вычитания (-)
+      GenMultiply,         // Операция умножения (*)
+      GenDivide,           // Операция деления (/)
+      GenAssign,           // Операция присваивания (=)
+      GenEqual,            // Операция сравнения на равенство (==)
+      GenNotEqual,         // Операция сравнения на неравенство (!=)
+      GenLess,             // Операция сравнения "меньше" (<)
+      GenGreater,          // Операция сравнения "больше" (>)
+      GenLessEqual,        // Операция сравнения "меньше или равно" (<=)
+      GenGreaterEqual,     // Операция сравнения "больше или равно" (>=)
+      GenUMinus,           // Операция унарного минуса (смена знака)
+      GenRead,             // Вызов функции ввода (read)
+      GenWrite,            // Вызов функции вывода (write)
+      GenIndex,            // Операция доступа по индексу массива ([])
+      GenArrayDecl,        // Вызов создания (объявления) массива
+      GenIntDecl,          // Объявление переменной типа int
+      GenSqrt,             // Вычисление квадратного корня (sqrt)
+      GenSin,              // Вычисление синуса (sin)
+      GenCos,              // Вычисление косинуса (cos)
+      GenPostIncrement,    // Операция постфиксного инкремента (++)
+      GenPostDecrement,    // Операция постфиксного декремента (--)
+      GenExp,              // Вычисление экспоненты (exp)
+      GenStringDecl,       // Объявление переменной типа string
+      GenPushConstText,    // Запись строкового литерала (текста в кавычках) в ОПС
+      StartWhile,          // Установка метки начала цикла while
+      WhileCondEnd,        // Генерация условного перехода при ложности условия цикла
+      EndWhile,            // Возврат к началу цикла и установка метки выхода из while
+      IfCondEnd,           // Генерация условного перехода при ложности условия if
+      IfElseStart,         // Безусловный переход в обход ветки else и установка метки перехода if
+      IfElseEnd            // Установка финальной метки выхода из конструкции if-else
    }
 
    public enum StackSymbolType { Terminal, NonTerminal, Action }
@@ -42,9 +87,12 @@ namespace Cocompliator
 
       static SyntaxAnalyzer() { InitializeParseTable(); }
 
+      /// @brief Заполнение управляющей таблицы LL(1)-анализатора правилами грамматики
       private static void InitializeParseTable()
       {
+
          // Program -> StatementList
+
          AddRule(NonTerminal.Program, TerminalType.VariableName, 
           new StackSymbol(NonTerminal.StatementList)
          );
@@ -185,6 +233,7 @@ namespace Cocompliator
           new StackSymbol(NonTerminal.VarInit)
          );
 
+
          // StatementSuffix -> = Expression [GenAssign] ; | [ Expression ] ArrayAccess
 
          AddRule(NonTerminal.StatementSuffix, TerminalType.Assignment, new StackSymbol(TerminalType.Assignment), new StackSymbol(NonTerminal.Expression), new StackSymbol(SemanticAction.GenAssign), new StackSymbol(TerminalType.Semicolon));
@@ -203,6 +252,7 @@ namespace Cocompliator
           new StackSymbol(TerminalType.Semicolon)
          );
 
+
          // ArrayAccess -> = Expression [GenIndex] [GenAssign] ; | VariableName [GenPushVar] [GenArrayDecl] ;
 
          AddRule(NonTerminal.ArrayAccess, TerminalType.Assignment,
@@ -216,6 +266,7 @@ namespace Cocompliator
          AddRule(NonTerminal.ArrayAccess, TerminalType.NotEqual, 
           Array.Empty<StackSymbol>()
          );
+
 
          // Expression -> Term ExpressionPrime
 
@@ -263,6 +314,7 @@ namespace Cocompliator
           new StackSymbol(NonTerminal.Term), 
           new StackSymbol(NonTerminal.ExpressionPrime)
          );
+
 
          // ExpressionPrime -> + Term [GenPlus] ExpressionPrime | - Term [GenMinus] ExpressionPrime | epsilon
 
@@ -316,6 +368,7 @@ namespace Cocompliator
           Array.Empty<StackSymbol>()
          );
 
+
          // Term -> Factor TermPrime
 
          AddRule(NonTerminal.Term, TerminalType.VariableName,
@@ -362,6 +415,7 @@ namespace Cocompliator
           new StackSymbol(NonTerminal.Factor), 
           new StackSymbol(NonTerminal.TermPrime)
          );
+
 
          // TermPrime -> * Factor [GenMultiply] TermPrime | / Factor [GenDivide] TermPrime | epsilon
 
@@ -423,6 +477,7 @@ namespace Cocompliator
           Array.Empty<StackSymbol>()
          );
 
+
          // Factor -> VariableName [GenPushVar] ArrayAccess | Number [GenPushConst] | ( Expression )
 
          AddRule(NonTerminal.Factor, TerminalType.VariableName,
@@ -430,6 +485,7 @@ namespace Cocompliator
           new StackSymbol(SemanticAction.GenPushVar), 
           new StackSymbol(NonTerminal.ArrayAccess)
          );
+
          AddRule(NonTerminal.Factor, TerminalType.Number,
           new StackSymbol(TerminalType.Number), 
           new StackSymbol(SemanticAction.GenPushConst)
@@ -484,7 +540,8 @@ namespace Cocompliator
           new StackSymbol(SemanticAction.GenPushConstText)
          );
 
-          // ArrayAccess -> [ Expression ] [GenIndex] | epsilon
+
+         // ArrayAccess -> [ Expression ] [GenIndex] | epsilon
 
          AddRule(NonTerminal.ArrayAccess, TerminalType.LeftBracket, 
           new StackSymbol(TerminalType.LeftBracket), 
@@ -541,6 +598,7 @@ namespace Cocompliator
           Array.Empty<StackSymbol>()
          );
 
+
          // Condition -> Expression ConditionPrime (Обеспечивает сначала разбор левого операнда, затем правого)
 
          AddRule(NonTerminal.Condition, TerminalType.VariableName, 
@@ -557,6 +615,7 @@ namespace Cocompliator
           new StackSymbol(NonTerminal.Expression), 
           new StackSymbol(NonTerminal.ConditionPrime)
          );
+
 
          // ConditionPrime -> CompOperator Expression [SemanticAction] (Генерирует оператор ПОСЛЕ правого операнда)
 
@@ -596,6 +655,7 @@ namespace Cocompliator
           new StackSymbol(SemanticAction.GenNotEqual)
          );
 
+
          // Read/Write Statements
 
          AddRule(NonTerminal.ReadStatement, TerminalType.Read, 
@@ -615,6 +675,7 @@ namespace Cocompliator
           new StackSymbol(SemanticAction.GenWrite)
          );
 
+
          // While
 
          AddRule(NonTerminal.WhileStatement, TerminalType.While,
@@ -627,6 +688,7 @@ namespace Cocompliator
           new StackSymbol(NonTerminal.BlockOrStatement), 
           new StackSymbol(SemanticAction.EndWhile)
          );
+
 
          // If Statement
 
@@ -687,7 +749,7 @@ namespace Cocompliator
          ParseTable[(nt, t)] = symbols;
       }
 
-      /// @brief Генерация ОПС на основе списка терминалов от лексера коллег
+      /// @brief Генерация ОПС на основе списка терминалов от лексера
       /// @param terminals Терминалы от лексического анализатора
       /// @return ОПС в виде списка RPNSymbol
       public static List<RPNSymbol> GenerateRPN(List<Terminal> terminals)
@@ -749,6 +811,7 @@ namespace Cocompliator
          return rpn;
       }
 
+      /// @brief Выполнение семантического действия для генерации ОПС
       private static void ExecuteSemanticAction(SemanticAction action, List<RPNSymbol> rpn, Stack<RPNMark> labels, ref int labelCounter, Terminal last)
       {
          int line = last?.LinePointer ?? 1;
@@ -879,13 +942,33 @@ namespace Cocompliator
                rpn.Add(finalLabel); 
                break;
 
-            case SemanticAction.GenSqrt: rpn.Add(new RPNSymbol(RPNType.F_Sqrt) { LinePointer = line, CharPointer = col }); break;
-            case SemanticAction.GenSin: rpn.Add(new RPNSymbol(RPNType.F_Sin) { LinePointer = line, CharPointer = col }); break;
-            case SemanticAction.GenCos: rpn.Add(new RPNSymbol(RPNType.F_Cos) { LinePointer = line, CharPointer = col }); break;
-            case SemanticAction.GenExp: rpn.Add(new RPNSymbol(RPNType.F_Exp) { LinePointer = line, CharPointer = col }); break;
-            case SemanticAction.GenPostIncrement: rpn.Add(new RPNSymbol(RPNType.F_PostIncrement) { LinePointer = line, CharPointer = col }); break;
-            case SemanticAction.GenPostDecrement: rpn.Add(new RPNSymbol(RPNType.F_PostDecrement) { LinePointer = line, CharPointer = col }); break;
-            case SemanticAction.GenUMinus: rpn.Add(new RPNSymbol(RPNType.F_UMinus) { LinePointer = line, CharPointer = col }); break;
+            case SemanticAction.GenSqrt: 
+               rpn.Add(new RPNSymbol(RPNType.F_Sqrt) { LinePointer = line, CharPointer = col });
+               break;
+
+            case SemanticAction.GenSin: 
+               rpn.Add(new RPNSymbol(RPNType.F_Sin) { LinePointer = line, CharPointer = col }); 
+               break;
+            
+            case SemanticAction.GenCos: 
+               rpn.Add(new RPNSymbol(RPNType.F_Cos) { LinePointer = line, CharPointer = col }); 
+               break;
+
+            case SemanticAction.GenExp: 
+               rpn.Add(new RPNSymbol(RPNType.F_Exp) { LinePointer = line, CharPointer = col }); 
+               break;
+
+            case SemanticAction.GenPostIncrement: 
+               rpn.Add(new RPNSymbol(RPNType.F_PostIncrement) { LinePointer = line, CharPointer = col }); 
+               break;
+
+            case SemanticAction.GenPostDecrement: 
+               rpn.Add(new RPNSymbol(RPNType.F_PostDecrement) { LinePointer = line, CharPointer = col }); 
+               break;
+
+            case SemanticAction.GenUMinus: 
+               rpn.Add(new RPNSymbol(RPNType.F_UMinus) { LinePointer = line, CharPointer = col }); 
+               break;
          }
       }
    }
