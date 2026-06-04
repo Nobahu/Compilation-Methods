@@ -16,6 +16,22 @@ namespace Cocompliator
                 return;
             }
 
+            /// Отладка
+            Console.WriteLine("=== RPN INSTRUCTIONS ===");
+            for (int i = 0; i < rpn.Count; i++)
+            {
+                var s = rpn[i];
+                string info = s.RPNType.ToString();
+                if (s is RPNIdentifier id)
+                    info += $" ({id.Name})";
+                else if (s is RPNNumber num)
+                    info += $" ({num.Data})";
+                else if (s is RPNMark mark)
+                    info += $" ({mark.MarkType})";
+                Console.WriteLine($"{i}: {info}");
+            }
+            Console.WriteLine("========================");
+
             var variables = new Dictionary<string, double>();
             var stringVariables = new Dictionary<string, string>();
             var arrays = new Dictionary<string, List<double>>();
@@ -62,7 +78,6 @@ namespace Cocompliator
                     {
                         var index = (int)ResolveValue(stack.Pop(), variables, arrays);
                         var arrayName = stack.Pop() as RPNIdentifier;
-                        /// Уточнить работу
                         stack.Push(new RPNArrayAccess { ArrayName = arrayName.Name, Index = index, LinePointer = symbol.LinePointer, CharPointer = symbol.CharPointer });
                     }
 
@@ -222,7 +237,7 @@ namespace Cocompliator
                         var valSymbol = stack.Pop();
                         var target = stack.Pop();
 
-                        /// Присвоение переменной (строка или число)
+                        /// Присвоение к переменной (строка или число)
                         if (target is RPNIdentifier targetVar)
                         {
                             if (valSymbol is RPNTextLine textVal)
@@ -239,7 +254,7 @@ namespace Cocompliator
                                 variables[targetVar.Name] = val;
                             }
                         }
-                        /// Присвоение переменной (элемент массива)
+                        /// Присвоение к переменной (элемент массива)
                         else if (target is RPNArrayAccess arrayAccess)
                         {
                             double val = ResolveValue(valSymbol, variables, arrays);
@@ -264,7 +279,6 @@ namespace Cocompliator
                     {
                         /// Уточнить
                         var target = stack.Pop() as RPNIdentifier;
-                        Console.Write($"Ввод ({target.Name}): ");
                         string input = Console.ReadLine();
                         if (!double.TryParse(input.Replace('.', ','), out double parsed))
                         {
@@ -376,14 +390,10 @@ namespace Cocompliator
 
                         if (symbol.RPNType == RPNType.F_String)
                         {
-                            if (stringVariables.ContainsKey(target.Name))
-                                throw CompilerException.VariableAlreadyDeclared(target.Name, symbol.LinePointer, symbol.CharPointer);
                             stringVariables[target.Name] = "";
                         }
                         else /// F_Int
                         {
-                            if (variables.ContainsKey(target.Name))
-                                throw CompilerException.VariableAlreadyDeclared(target.Name, symbol.LinePointer, symbol.CharPointer);
                             variables[target.Name] = 0;
                         }
                     }

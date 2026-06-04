@@ -771,7 +771,7 @@ namespace Cocompliator
 
             if (top.Type == StackSymbolType.Terminal)
             {
-               if (currentToken == null || currentToken.TerminalType != top.Terminal)
+               if ( currentToken == null || currentToken.TerminalType != top.Terminal )
                {
                   throw CompilerException.SyntaxTerminalMismatch(top.Terminal.ToString(), currentToken?.TerminalType.ToString() ?? 
                       "конец файла", currentToken?.LinePointer ?? -1, currentToken?.CharPointer ?? -1);
