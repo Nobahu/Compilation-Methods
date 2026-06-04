@@ -279,13 +279,6 @@ namespace Cocompliator
           new StackSymbol( TerminalType.RightBracket ), 
           new StackSymbol( NonTerminal.ArrayAccess ) 
          );
-         
-         AddRule( NonTerminal.StatementSuffix, TerminalType.VariableName, 
-          new StackSymbol( TerminalType.VariableName ), 
-          new StackSymbol( SemanticAction.GenPushVar ), 
-          new StackSymbol( SemanticAction.GenIntDecl ), 
-          new StackSymbol( NonTerminal.VarInit ) 
-         );
 
          AddRule( NonTerminal.StatementSuffix, TerminalType.Plus, 
           new StackSymbol( TerminalType.Plus ), 
@@ -307,7 +300,6 @@ namespace Cocompliator
 
          AddRule( NonTerminal.VarInit, TerminalType.Assignment, 
           new StackSymbol( TerminalType.Assignment ), 
-          new StackSymbol( SemanticAction.GenPushVar ), // Дублируем имя переменной на стек ОПС для операции присваивания
           new StackSymbol( NonTerminal.Expression ), 
           new StackSymbol( SemanticAction.GenAssign ), 
           new StackSymbol( TerminalType.Semicolon ) 
@@ -933,6 +925,10 @@ namespace Cocompliator
 
             case SemanticAction.GenAssign:
                rpn.Add( new RPNSymbol( RPNType.F_Assignment ) { LinePointer = line, CharPointer = col } );
+               break;
+
+            case SemanticAction.GenEqual:
+               rpn.Add( new RPNSymbol( RPNType.F_Equal ) { LinePointer = line, CharPointer = col });
                break;
 
             case SemanticAction.GenNotEqual:

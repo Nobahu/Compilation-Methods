@@ -378,6 +378,21 @@ namespace Cocompliator
                             throw new Exception("Error: Ожидался идентификатор при объявлении string");
                         stringVariables[target.Name] = "";
                     }
+                    else if (symbol.RPNType == RPNType.F_Int)
+                    {
+                        if (stack.Count < 1)
+                            throw new Exception("Error: Отсутствует идентификатор для объявления int");
+
+                        var target = stack.Peek() as RPNIdentifier;
+                        if (target == null)
+                            throw new Exception("Error: Ожидался идентификатор при объявлении int");
+                        
+                        // Безопасно резервируем переменную в памяти со значением по умолчанию
+                        if (!variables.ContainsKey(target.Name))
+                        {
+                            variables[target.Name] = 0;
+                        }
+                    }
                 }
             }
             catch (Exception e)

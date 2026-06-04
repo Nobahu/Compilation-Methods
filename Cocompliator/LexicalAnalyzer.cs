@@ -13,7 +13,7 @@ namespace Cocompliator
 
         public static bool IsLexicalCorrect(string data)
         {
-            Data = data;
+            Data = data + " ";
             _pointer = 0;
             _charPointer = 1;
             _linePointer = 1;
