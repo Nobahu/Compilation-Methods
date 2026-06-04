@@ -15,20 +15,20 @@ namespace Cocompliator
                 }
 
                 /// Отладка
-                Console.WriteLine("=== RPN INSTRUCTIONS ===");
-                for (int i = 0; i < rpn.Count; i++)
-                {
-                    var s = rpn[i];
-                    string info = s.RPNType.ToString();
-                    if (s is RPNIdentifier id)
-                        info += $" ({id.Name})";
-                    else if (s is RPNNumber num)
-                        info += $" ({num.Data})";
-                    else if (s is RPNMark mark)
-                        info += $" ({mark.MarkType})";
-                    Console.WriteLine($"{i}: {info}");
-                }
-                Console.WriteLine("========================");
+                //Console.WriteLine("=== RPN INSTRUCTIONS ===");
+                //for (int i = 0; i < rpn.Count; i++)
+                //{
+                //    var s = rpn[i];
+                //    string info = s.RPNType.ToString();
+                //    if (s is RPNIdentifier id)
+                //        info += $" ({id.Name})";
+                //    else if (s is RPNNumber num)
+                //        info += $" ({num.Data})";
+                //    else if (s is RPNMark mark)
+                //        info += $" ({mark.MarkType})";
+                //    Console.WriteLine($"{i}: {info}");
+                //}
+                //Console.WriteLine("========================");
 
                 var variables = new Dictionary<string, double>();
                 var stringVariables = new Dictionary<string, string>();
@@ -191,7 +191,6 @@ namespace Cocompliator
                                 throw new Exception($"Error: Индекс {arrayAccess.Index} выходит за границы");
 
                             arrays[arrayAccess.ArrayName][arrayAccess.Index] = val;
-                            Console.WriteLine($"{arrayAccess.ArrayName}[{arrayAccess.Index}] = {val}");
                         }
                     }
                     /// ВВОД (read)
