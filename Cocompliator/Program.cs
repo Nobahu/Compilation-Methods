@@ -29,11 +29,11 @@ namespace Cocompliator
             }
             catch (CompilerException ex)
             {
-                Console.WriteLine($"\nОшибка компиляции: {ex.Message} на строке {ex.LineNumber}");
+                Console.WriteLine($"\nОшибка компиляции: {ex.Message} на строке {ex.LineNumber} на позиции {ex.CharPosition}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"\nОшибка: {ex.Message}");
+                Console.WriteLine($"{ex.Message}");
             }
         }
     }

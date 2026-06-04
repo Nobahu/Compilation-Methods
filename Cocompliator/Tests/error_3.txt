@@ -1,2 +1,2 @@
-﻿int a = 5 / 1;
+﻿int a = 5 / 0;
 write(a);
