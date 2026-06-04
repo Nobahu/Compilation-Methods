@@ -279,13 +279,6 @@ namespace Cocompliator
           new StackSymbol( TerminalType.RightBracket ), 
           new StackSymbol( NonTerminal.ArrayAccess ) 
          );
-         
-         AddRule( NonTerminal.StatementSuffix, TerminalType.VariableName, 
-          new StackSymbol( TerminalType.VariableName ), 
-          new StackSymbol( SemanticAction.GenPushVar ), 
-          new StackSymbol( SemanticAction.GenIntDecl ), 
-          new StackSymbol( NonTerminal.VarInit ) 
-         );
 
          AddRule( NonTerminal.StatementSuffix, TerminalType.Plus, 
           new StackSymbol( TerminalType.Plus ), 
