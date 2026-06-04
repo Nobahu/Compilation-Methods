@@ -73,5 +73,11 @@ namespace Cocompliator
 
         public static CompilerException RuntimeTypeError(string expected, int line, int col) =>
             new CompilerException($"Ошибка типов: Ожидался тип {expected}.", line, col);
+
+
+        public static CompilerException RuntimeNegativeMultiplier(int line, int col)
+    => new CompilerException("Отрицательный множитель для строки", line, col);
+        public static CompilerException RuntimeInvalidStringMultiplication(int line, int col)
+            => new CompilerException("Операция '*' требует строку и число", line, col);
     }
 }

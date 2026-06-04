@@ -7,7 +7,10 @@ namespace Cocompliator
     {
         public static void ExecuteInstructions(List<RPNSymbol> rpn)
         {
-            if (rpn == null || rpn.Count == 0) return;
+            if (rpn == null || rpn.Count == 0)
+            {
+                return;
+            }
 
             var variables = new Dictionary<string, double>();
             var stringVariables = new Dictionary<string, string>();
@@ -27,14 +30,23 @@ namespace Cocompliator
                     }
                     else if (symbol.RPNType == RPNType.F_IntArray)
                     {
-                        if (stack.Count < 2) throw CompilerException.RuntimeStackUnderflow(symbol.LinePointer, symbol.CharPointer);
+                        if (stack.Count < 2)
+                        {
+                            throw CompilerException.RuntimeStackUnderflow(symbol.LinePointer, symbol.CharPointer);
+                        }
                         var arrayName = stack.Pop() as RPNIdentifier;
                         var sizeSymbol = stack.Pop();
                         int size = (int)ResolveValue(sizeSymbol, variables, arrays);
 
-                        if (size <= 0) throw CompilerException.RuntimeInvalidArraySize(arrayName.Name, size, symbol.LinePointer, symbol.CharPointer);
+                        if (size <= 0)
+                        {
+                            throw CompilerException.RuntimeInvalidArraySize(arrayName.Name, size, symbol.LinePointer, symbol.CharPointer);
+                        }
                         var newArray = new List<double>();
-                        for (int i = 0; i < size; i++) newArray.Add(0);
+                        for (int i = 0; i < size; i++)
+                        {
+                            newArray.Add(0);
+                        }
                         arrays[arrayName.Name] = newArray;
                     }
                     else if (symbol.RPNType == RPNType.F_Index)
@@ -43,22 +55,122 @@ namespace Cocompliator
                         var arrayName = stack.Pop() as RPNIdentifier;
                         stack.Push(new RPNArrayAccess { ArrayName = arrayName.Name, Index = index, LinePointer = symbol.LinePointer, CharPointer = symbol.CharPointer });
                     }
-                    else if (symbol.RPNType == RPNType.F_Plus || symbol.RPNType == RPNType.F_Minus ||
-                            symbol.RPNType == RPNType.F_Multiply || symbol.RPNType == RPNType.F_Divide)
+                    else if (symbol.RPNType == RPNType.F_Plus || symbol.RPNType == RPNType.F_Multiply)
+                    {
+                        var right = stack.Pop();
+                        var left = stack.Pop();
+
+                        // Проверяем, есть ли среди операндов строки (литералы или строковые переменные)
+                        bool leftIsString = (left is RPNTextLine) ||
+                                            (left is RPNIdentifier leftId && stringVariables.ContainsKey(leftId.Name));
+                        bool rightIsString = (right is RPNTextLine) ||
+                                             (right is RPNIdentifier rightId && stringVariables.ContainsKey(rightId.Name));
+
+                        if (symbol.RPNType == RPNType.F_Plus)
+                        {
+                            if (leftIsString || rightIsString)
+                            {
+                                // Конкатенация строк
+                                string leftStr = GetStringValue(left, variables, stringVariables, arrays);
+                                string rightStr = GetStringValue(right, variables, stringVariables, arrays);
+                                stack.Push(new RPNTextLine(RPNType.A_TextLine)
+                                {
+                                    Data = leftStr + rightStr,
+                                    LinePointer = symbol.LinePointer,
+                                    CharPointer = symbol.CharPointer
+                                } );
+                            }
+                            else
+                            {
+                                // Числовое сложение
+                                double val2 = ResolveValue(right, variables, arrays);
+                                double val1 = ResolveValue(left, variables, arrays);
+                                double result = val1 + val2;
+                                stack.Push(new RPNNumber(RPNType.A_Number)
+                                {
+                                    Data = (int)result,
+                                    DoubleData = result,
+                                    LinePointer = symbol.LinePointer,
+                                    CharPointer = symbol.CharPointer
+                                });
+                            }
+                        }
+                        else // F_Multiply
+                        {
+                            // Умножение: один операнд строка, другой целое число
+                            if (leftIsString && !rightIsString)
+                            {
+                                string str = GetStringValue(left, variables, stringVariables, arrays);
+                                double count = ResolveValue(right, variables, arrays);
+                                int intCount = (int)count;
+                                if (intCount < 0)
+                                {
+                                    throw CompilerException.RuntimeNegativeMultiplier(symbol.LinePointer, symbol.CharPointer);
+                                }
+                                string result = string.Concat(Enumerable.Repeat(str, intCount));
+                                stack.Push(new RPNTextLine(RPNType.A_TextLine)
+                                {
+                                    Data = result,
+                                    LinePointer = symbol.LinePointer,
+                                    CharPointer = symbol.CharPointer
+                                });
+                            }
+                            else if (rightIsString && !leftIsString)
+                            {
+                                string str = GetStringValue(right, variables, stringVariables, arrays);
+                                double count = ResolveValue(left, variables, arrays);
+                                int intCount = (int)count;
+                                if (intCount < 0)
+                                    throw CompilerException.RuntimeNegativeMultiplier(symbol.LinePointer, symbol.CharPointer);
+                                string result = string.Concat(Enumerable.Repeat(str, intCount));
+                                stack.Push(new RPNTextLine(RPNType.A_TextLine)
+                                {
+                                    Data = result,
+                                    LinePointer = symbol.LinePointer,
+                                    CharPointer = symbol.CharPointer
+                                });
+                            }
+                            else if (!leftIsString && !rightIsString)
+                            {
+                                // Числовое умножение
+                                double val2 = ResolveValue(right, variables, arrays);
+                                double val1 = ResolveValue(left, variables, arrays);
+                                double result = val1 * val2;
+                                stack.Push(new RPNNumber(RPNType.A_Number)
+                                {
+                                    Data = (int)result,
+                                    DoubleData = result,
+                                    LinePointer = symbol.LinePointer,
+                                    CharPointer = symbol.CharPointer
+                                });
+                            }
+                            else
+                            {
+                                // Оба операнда строки – ошибка
+                                throw CompilerException.RuntimeInvalidStringMultiplication(symbol.LinePointer, symbol.CharPointer);
+                            }
+                        }
+                    }
+                    else if (symbol.RPNType == RPNType.F_Minus || symbol.RPNType == RPNType.F_Divide)
                     {
                         double val2 = ResolveValue(stack.Pop(), variables, arrays);
                         double val1 = ResolveValue(stack.Pop(), variables, arrays);
-                        double result = 0;
-
-                        if (symbol.RPNType == RPNType.F_Plus) result = val1 + val2;
-                        if (symbol.RPNType == RPNType.F_Minus) result = val1 - val2;
-                        if (symbol.RPNType == RPNType.F_Multiply) result = val1 * val2;
-                        if (symbol.RPNType == RPNType.F_Divide)
+                        double result;
+                        if (symbol.RPNType == RPNType.F_Minus)
+                            result = val1 - val2;
+                        else
                         {
-                            if (val2 == 0) throw CompilerException.RuntimeDivideByZero(symbol.LinePointer, symbol.CharPointer);
+                            if (val2 == 0)
+                                throw CompilerException.RuntimeDivideByZero(symbol.LinePointer, symbol.CharPointer);
                             result = val1 / val2;
                         }
-                        stack.Push(new RPNNumber(RPNType.A_Number) { Data = (int)result, DoubleData = result, LinePointer = symbol.LinePointer, CharPointer = symbol.CharPointer });
+                        stack.Push(new RPNNumber(RPNType.A_Number)
+                        {
+                            Data = (int)result,
+                            DoubleData = result,
+                            LinePointer = symbol.LinePointer,
+                            CharPointer = symbol.CharPointer
+                        });
                     }
                     else if (symbol.RPNType == RPNType.F_UMinus)
                     {
@@ -219,6 +331,26 @@ namespace Cocompliator
                 return Math.Abs(arrays[arrayAccess.ArrayName][arrayAccess.Index]) > 1e-15;
             }
             throw CompilerException.RuntimeTypeError("логическое условие", sym.LinePointer, sym.CharPointer);
+        }
+
+        private static string GetStringValue(RPNSymbol sym, Dictionary<string, double> vars,
+               Dictionary<string, string> stringVars, Dictionary<string, List<double>> arrays)
+        {
+            if (sym is RPNTextLine text)
+                return text.Data;
+            if (sym is RPNIdentifier id)
+            {
+                if (stringVars.ContainsKey(id.Name))
+                    return stringVars[id.Name];
+                if (vars.ContainsKey(id.Name))
+                    return vars[id.Name].ToString();
+                throw CompilerException.RuntimeVariableNotInit(id.Name, sym.LinePointer, sym.CharPointer);
+            }
+            if (sym is RPNNumber num)
+                return (num.DoubleData == 0 && num.Data != 0 ? num.Data : num.DoubleData).ToString();
+            if (sym is RPNBoolean boolVal)
+                return boolVal.Data.ToString();
+            throw CompilerException.RuntimeTypeError("строку", sym.LinePointer, sym.CharPointer);
         }
     }
 }

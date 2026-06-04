@@ -113,9 +113,23 @@ namespace Cocompliator
 
         private static void SaveTerminal(TerminalType type, string value, int line, int ch)
         {
-            if (type == TerminalType.Number) Terminals.Add(new Terminal.Number(type, line, ch, value));
-            else if (type == TerminalType.VariableName || type == TerminalType.Text) Terminals.Add(new Terminal.Identifier(type, line, ch, value));
-            else Terminals.Add(new Terminal(type, line, ch));
+            if (type == TerminalType.Number)
+            {
+                Terminals.Add(new Terminal.Number(type, line, ch, value));
+            }
+            else if (type == TerminalType.VariableName || type == TerminalType.Text)
+            {
+                // Если это строковый литерал – удаляем окружающие кавычки
+                if (type == TerminalType.Text && value.Length >= 2 && value[0] == '"' && value[value.Length - 1] == '"')
+                {
+                    value = value.Substring(1, value.Length - 2);
+                }
+                Terminals.Add(new Terminal.Identifier(type, line, ch, value));
+            }
+            else
+            {
+                Terminals.Add(new Terminal(type, line, ch));
+            }
         }
 
         private static int GetCharColumn(char c)
