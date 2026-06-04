@@ -1,3 +1,3 @@
 int a = 10;
 write(a);
-fdgsdfgdsfgdsfgsdfgsdfgsdfgdsfgsdfgdsfg
+gsdfgsdfgsdfgsdfgsa

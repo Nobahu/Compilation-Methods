@@ -11,7 +11,7 @@ namespace Cocompliator
             try
             {
                 // Название нашего файла с формулой
-                string testFileName = "C:\\Users\\user\\source\\repos\\Cocompliator\\Cocompliator\\Tests\\diff_calc_test.txt";
+                string testFileName = "C:\\Users\\user\\source\\repos\\Cocompliator\\Cocompliator\\Tests\\error_2.txt";
                 string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, testFileName);
                 
                 // Чтение исходного кода из файла через ваш FileReader

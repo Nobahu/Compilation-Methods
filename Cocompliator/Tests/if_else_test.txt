@@ -1,0 +1,11 @@
+﻿int barabashka = -5;
+int cheburashka = 10;
+
+if ( barabashka != cheburashka )
+{
+	write("Коля упал");
+}
+else 
+{
+	write("Коля держит ЛЭП");
+}

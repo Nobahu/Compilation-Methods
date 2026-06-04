@@ -197,7 +197,6 @@ namespace Cocompliator
                     else if (symbol.RPNType == RPNType.F_Read)
                     {
                         var target = stack.Pop() as RPNIdentifier;
-                        Console.Write($"Введите значение для переменной {target.Name}: ");
                         variables[target.Name] = Convert.ToDouble(Console.ReadLine().Replace('.', ','));
                     }
                     /// ВЫВОД (write)
@@ -454,7 +453,6 @@ namespace Cocompliator
                 double val = arrays[arrayAccess.ArrayName][arrayAccess.Index];
                 return Math.Abs(val) > 1e-15;
             }
-
             throw new Exception($"Невозможно преобразовать {sym?.RPNType} в булево значение");
         }
     }
